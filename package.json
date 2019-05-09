@@ -1,0 +1,24 @@
+{
+  "name": "opa-wasm",
+  "version": "0.0.1",
+  "description": "Open Policy Agent WebAssembly SDK",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-policy-agent/npm-opa-wasm.git"
+  },
+  "keywords": [
+    "opa",
+    "wasm",
+    "policy"
+  ],
+  "author": "patrick@styra.com",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/open-policy-agent/npm-opa-wasm/issues"
+  },
+  "homepage": "https://github.com/open-policy-agent/npm-opa-wasm#readme"
+}
