@@ -18,7 +18,7 @@ There are only a couple of steps required to start evaluating the policy.
 ### Import the module and initialize a Rego object
 
 ```javascript
-const Rego = require("opa-wasm")
+const Rego = require("@open-policy-agent/opa-wasm")
 
 rego = new Rego()
 ```
