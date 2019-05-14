@@ -1,8 +1,10 @@
 **Work in Progress -- Contributions welcome!!** 
 
-# `opa-wasm` --  Open Policy Agent WebAssemby NPM Module
-This is the source for the `opa-wasm` NPM module which is a small SDK for
-using WebAssembly (wasm) compiled [Open Policy Agent](https://www.openpolicyagent.org/) Rego policies.
+# Open Policy Agent WebAssemby NPM Module
+This is the source for the
+[@open-policy-agent/opa-wasm](https://www.npmjs.com/package/@open-policy-agent/opa-wasm)
+NPM module which is a small SDK for using WebAssembly (wasm) compiled 
+[Open Policy Agent](https://www.openpolicyagent.org/) Rego policies.
 
 # Getting Started
 ## Install the module
