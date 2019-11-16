@@ -1,12 +1,8 @@
 package example
 
-allow {
-    input.method = "get"
-    input.path = "/trades"
-}
+default hello = false
 
-allow {
-    input.method = "post"
-    input.path = "/trades"
-    input.role = "admin"
+hello {
+    x := input.message
+    x == data.world
 }
