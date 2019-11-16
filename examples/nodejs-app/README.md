@@ -16,19 +16,15 @@ npm install
 There is an example policy included with the example, see [example.rego](./example.rego)
 
 ```bash
-opa build -d example.rego 'data.example.allow = true'
+opa build -d example.rego 'data.example'
 ```
 
 ## Run the example Node JS code that invokes the Wasm binary:
 
 ```bash
-node app.js '{"method": "get", "path": "/trades"}'
+node app.js '{"message": "world"}'
 ```
 
 ```bash
-node app.js '{"method": "post", "path": "/trades"}'
-```
-
-```bash
-node app.js '{"method": "post", "path": "/trades", "role": "admin"}'
+node app.js '{"message": "not-world"}'
 ```

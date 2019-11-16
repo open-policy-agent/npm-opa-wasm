@@ -75,13 +75,13 @@ Example:
 
 ```javascript
 
-input = '{"path": "/", "role": "admin"}'
+input = '{"path": "/", "role": "admin"}';
 
 rego.load_policy(policy_wasm).then(policy => {
-    allowed = policy.eval_bool(input)
-    console.log("allowed = " + allowed)
-}, error => {
-    console.error("Failed to load policy: " + error)
+    allowed = policy.eval_bool(input);
+    console.log("allowed = " + allowed);
+}).catch( error => {
+    console.error("Failed to load policy: " + error);
 })
 ```
 
