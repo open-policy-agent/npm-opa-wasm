@@ -111,7 +111,7 @@ async function _load_policy(policy_wasm, memory) {
                 return _builtinCall(env.instance, memory, env.builtins, builtin_id, _1, _2, _3);
             },
             opa_builtin4: function(builtin_id, ctx, _1, _2, _3, _4) {
-                return _builtinCall(env.instance, memory, env.builtins, builtin_id, _1, _2, _3);
+                return _builtinCall(env.instance, memory, env.builtins, builtin_id, _1, _2, _3, _4);
             },
         },
     });
