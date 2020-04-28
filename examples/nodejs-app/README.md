@@ -16,7 +16,7 @@ npm install
 There is an example policy included with the example, see [example.rego](./example.rego)
 
 ```bash
-opa build -d example.rego 'data.example = x'
+opa build -d example.rego 'x := data.example'
 ```
 
 ## Run the example Node JS code that invokes the Wasm binary:
