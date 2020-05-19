@@ -3,8 +3,10 @@
   "version": "1.1.0",
   "description": "Open Policy Agent WebAssembly SDK",
   "main": "src/opa.js",
+  "types": "types/opa.d.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "types": "tsc"
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,7 @@
   },
   "homepage": "https://github.com/open-policy-agent/npm-opa-wasm#readme",
   "devDependencies": {
-    "jest": "^26.0.1"
+    "jest": "^26.0.1",
+    "typescript": "^3.9.2"
   }
 }

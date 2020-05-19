@@ -1,0 +1,16 @@
+{
+  "files": [
+    "src/opa.js"
+  ],
+  "compilerOptions": {
+    "target": "ES2020",
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "noEmit": false,
+    "outDir": "types",
+    "emitDeclarationOnly": true,
+    "declarationMap": true,
+    "typeRoots": []
+  }
+}
