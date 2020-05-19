@@ -2,3 +2,4 @@
 *.wasm
 node_modules
 *.lock
+types/
