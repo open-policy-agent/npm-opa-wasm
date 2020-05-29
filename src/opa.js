@@ -124,6 +124,9 @@ async function _loadPolicy(policy_wasm, memory) {
       opa_abort: function (addr) {
         throw addr2string(addr);
       },
+      opa_println: function (addr) {
+        console.log(addr2string(addr))
+      },
       opa_builtin0: function (builtin_id, ctx) {
         return _builtinCall(env.instance, memory, env.builtins, builtin_id);
       },
