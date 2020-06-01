@@ -13,6 +13,8 @@ npm install
 
 There is an example policy included with the example, see [example.rego](./example.rego)
 
+> Requires OPA v0.20.5+
+
 ```bash
 npm run build
 ```
