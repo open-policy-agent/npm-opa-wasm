@@ -93,13 +93,13 @@ See [https://www.openpolicyagent.org/docs/latest/how-do-i-write-policies/](https
 
 Either use the [Compile REST API](https://www.openpolicyagent.org/docs/latest/rest-api/#compile-api) or `opa build` CLI tool.
 
-For example:
+For example, with OPA v0.20.5+:
 
 ```bash
-opa build -d example.rego 'data.example.allow = true'
+opa build -t wasm -e 'example/allow' example.rego
 ```
-Which is compiling the `example.rego` policy file with the query
-`data.example.allow = true`. See [./examples](./examples) for a
-more comprehensive example.
+Which is compiling the `example.rego` policy file with the result set to
+`data.example.allow`. The result will be an OPA bundle with the `policy.wasm`
+binary included. See [./examples](./examples) for a more comprehensive example.
 
 See `opa build --help` for more details.
