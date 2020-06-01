@@ -17,37 +17,35 @@ npm install @open-policy-agent/opa-wasm
 
 There are only a couple of steps required to start evaluating the policy.
 
-### Import the module and initialize a Rego object
+### Import the module
 
 ```javascript
-const Rego = require("@open-policy-agent/opa-wasm")
-
-rego = new Rego()
+const { loadPolicy } = require("@open-policy-agent/opa-wasm");
 ```
 
 ### Load the policy
 
 ```javascript
-rego.load_policy(policy_wasm)
+loadPolicy(policyWasm)
 ```
 The `load_policy` request returns a Promise with the loaded policy.
 Typically this means loading it in an `async` function like:
 
 ```javascript
-const policy = await rego.load_policy(policy_wasm)
+const policy = await loadPolicy(policyWasm)
 ```
 
 Or something like:
 
 ```javascript
-rego.load_policy(policy_wasm).then(policy => {
+loadPolicy(policyWasm).then(policy => {
     // evaluate or save the policy
 }, error => {
     console.error("Failed to load policy: " + error)
 })
 ```
 
-The `policy_wasm` needs to be either the raw byte array of
+The `policyWasm` needs to be either the raw byte array of
 the compiled policy wasm file, or a web assembly module.
 
 For example:
@@ -55,19 +53,20 @@ For example:
 ```javascript
 const fs = require('fs');
 
-const policy_wasm = fs.readFileSync('policy.wasm')
+const policyWasm = fs.readFileSync('policy.wasm');
 ```
 
-Alternatively the bytes can be pulled in remotely from a `fetch` or
-in some cases (like CloudFlare Workers) the wasm is loaded directly into
-the javascript context through external APIs.
+Alternatively the bytes can be pulled in remotely from a `fetch` or in some
+cases (like CloudFlare Workers) the wasm binary can be loaded directly into the
+javascript context through external APIs.
 
 ### Evaluate the Policy
 
-The loaded policy object returned from `load_policy()` has, as of now, only
-one method for evaluating the policy: `eval_bool()`. This will evaluate the
-policy and expects a boolean query result. The return value is a javascript
-`Boolean`.
+The loaded policy object returned from `loadPolicy()` has a couple of important
+API's for policy evaluation:
+
+`setData(obj)` -- Provide an external `data` document for policy evaluation. Requires a JSON serializable object.
+`evaluate(input)` -- Evaluates the policy using any loaded data and the supplied `input` document.
 
 The `input` parameter must be a JSON string.
 
@@ -77,13 +76,24 @@ Example:
 
 input = '{"path": "/", "role": "admin"}';
 
-rego.load_policy(policy_wasm).then(policy => {
-    allowed = policy.eval_bool(input);
-    console.log("allowed = " + allowed);
+loadPolicy(policyWasm).then(policy => {
+    resultSet = policy.evaluate(input);
+    if (resultSet == null) {
+        console.error("evaluation error")
+    }
+    if (resultSet.length == 0) {
+        console.log("undefined")
+    }
+    console.log("allowed = " + allowed[0].result);
 }).catch( error => {
-    console.error("Failed to load policy: " + error);
+    console.error("Failed to load policy: ", error);
 })
 ```
+
+> For any `opa build` created WASM binaries the result set, when defined, will
+   contain a `result` key with the value of the compiled entrypoint. See
+  [https://www.openpolicyagent.org/docs/latest/wasm/](https://www.openpolicyagent.org/docs/latest/wasm/)
+  for more details.
 
 ## Writing the policy
 
