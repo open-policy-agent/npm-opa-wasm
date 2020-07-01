@@ -26,5 +26,8 @@
   "devDependencies": {
     "jest": "^26.0.1",
     "typescript": "^3.9.2"
+  },
+  "dependencies": {
+    "jose": "^1.27.1"
   }
 }
