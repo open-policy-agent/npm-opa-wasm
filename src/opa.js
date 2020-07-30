@@ -19,8 +19,8 @@ function stringDecoder(mem) {
 
 /**
  * Stringifies and loads an object into OPA's Memory
- * @param {WebAssembly.Instance} wasmInstance 
- * @param {WebAssembly.Memory} memory 
+ * @param {WebAssembly.Instance} wasmInstance
+ * @param {WebAssembly.Memory} memory
  * @param {any} value
  * @returns {number}
  */
@@ -47,9 +47,9 @@ function _loadJSON(wasmInstance, memory, value) {
 
 /**
  * Dumps and parses a JSON object from OPA's Memory
- * @param {WebAssembly.Instance} wasmInstance 
- * @param {WebAssembly.Memory} memory 
- * @param {number} addr 
+ * @param {WebAssembly.Instance} wasmInstance
+ * @param {WebAssembly.Memory} memory
+ * @param {number} addr
  * @returns {object}
  */
 function _dumpJSON(wasmInstance, memory, addr) {
@@ -71,8 +71,8 @@ const builtinFuncs = builtIns;
 /**
  * _builtinCall dispatches the built-in function. The built-in function
  * arguments are loaded from Wasm and back in using JSON serialization.
- * @param {WebAssembly.Instance} wasmInstance 
- * @param {WebAssembly.Memory} memory 
+ * @param {WebAssembly.Instance} wasmInstance
+ * @param {WebAssembly.Memory} memory
  * @param {{ [builtinId: number]: string }} builtins
  * @param {string} builtin_id
  */
@@ -109,8 +109,8 @@ function _builtinCall(wasmInstance, memory, builtins, builtin_id) {
  * It will return a Promise, depending on the input type the promise
  * resolves to both a compiled WebAssembly.Module and its first WebAssembly.Instance
  * or to the WebAssemblyInstance.
- * @param {BufferSource | WebAssembly.Module} policy_wasm 
- * @param {WebAssembly.Memory} memory 
+ * @param {BufferSource | WebAssembly.Module} policy_wasm
+ * @param {WebAssembly.Memory} memory
  * @returns {Promise<WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance>}
  */
 async function _loadPolicy(policy_wasm, memory) {
@@ -195,8 +195,8 @@ async function _loadPolicy(policy_wasm, memory) {
 class LoadedPolicy {
   /**
    * Loads and initializes a compiled Rego policy.
-   * @param {WebAssembly.WebAssemblyInstantiatedSource} policy 
-   * @param {WebAssembly.Memory} memory 
+   * @param {WebAssembly.WebAssemblyInstantiatedSource} policy
+   * @param {WebAssembly.Memory} memory
    */
   constructor(policy, memory) {
     this.mem = memory;
@@ -208,9 +208,7 @@ class LoadedPolicy {
 
     this.dataAddr = _loadJSON(this.wasmInstance, this.mem, {});
     this.baseHeapPtr = this.wasmInstance.exports.opa_heap_ptr_get();
-    this.baseHeapTop = this.wasmInstance.exports.opa_heap_top_get();
     this.dataHeapPtr = this.baseHeapPtr;
-    this.dataHeapTop = this.baseHeapTop;
   }
 
   /**
@@ -222,7 +220,6 @@ class LoadedPolicy {
   evaluate(input) {
     // Reset the heap pointer before each evaluation
     this.wasmInstance.exports.opa_heap_ptr_set(this.dataHeapPtr);
-    this.wasmInstance.exports.opa_heap_top_set(this.dataHeapTop);
 
     // Load the input data
     const inputAddr = _loadJSON(this.wasmInstance, this.mem, input);
@@ -255,14 +252,12 @@ class LoadedPolicy {
 
   /**
    * Loads data for use in subsequent evaluations.
-   * @param {object} data 
+   * @param {object} data
    */
   setData(data) {
     this.wasmInstance.exports.opa_heap_ptr_set(this.baseHeapPtr);
-    this.wasmInstance.exports.opa_heap_top_set(this.baseHeapTop);
     this.dataAddr = _loadJSON(this.wasmInstance, this.mem, data);
     this.dataHeapPtr = this.wasmInstance.exports.opa_heap_ptr_get();
-    this.dataHeapTop = this.wasmInstance.exports.opa_heap_top_get();
   }
 }
 
