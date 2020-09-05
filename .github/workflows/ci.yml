@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install Open Policy Agent CLI
+      run: >
+        mkdir -p ${{ runner.tool_cache }}/opa &&
+        curl -sSL https://openpolicyagent.org/downloads/v0.23.2/opa_linux_amd64 -o ${{ runner.tool_cache }}/opa/opa &&
+        chmod +x ${{ runner.tool_cache }}/opa/opa &&
+        echo "::add-path::${{ runner.tool_cache }}/opa"
+    - run: npm ci
+    - run: npm run types
+    - run: npm test
+    - run: ./e2e.sh
