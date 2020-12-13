@@ -28,6 +28,7 @@
     "typescript": "^3.9.2"
   },
   "dependencies": {
-    "sprintf-js": "^1.1.2"
+    "sprintf-js": "^1.1.2",
+    "utf8": "^3.0.0"
   }
 }
