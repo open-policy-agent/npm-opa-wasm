@@ -2,6 +2,7 @@
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
 const builtIns = require("./builtins/index");
+const utf8 = require('utf8');
 
 /**
  * @param {WebAssembly.Memory} mem
@@ -29,7 +30,7 @@ function _loadJSON(wasmInstance, memory, value) {
     throw "unable to load undefined value into memory";
   }
 
-  const str = JSON.stringify(value);
+  const str = utf8.encode(JSON.stringify(value));
   const rawAddr = wasmInstance.exports.opa_malloc(str.length);
   const buf = new Uint8Array(memory.buffer);
 
@@ -63,7 +64,7 @@ function _dumpJSON(wasmInstance, memory, addr) {
     s += String.fromCharCode(buf[idx++]);
   }
 
-  return JSON.parse(s);
+  return JSON.parse(utf8.decode(s));
 }
 
 const builtinFuncs = builtIns;
