@@ -24,7 +24,7 @@ jobs:
         mkdir -p ${{ runner.tool_cache }}/opa &&
         curl -sSL https://openpolicyagent.org/downloads/v0.23.2/opa_linux_amd64 -o ${{ runner.tool_cache }}/opa/opa &&
         chmod +x ${{ runner.tool_cache }}/opa/opa &&
-        echo "::add-path::${{ runner.tool_cache }}/opa"
+        echo "${{ runner.tool_cache }}/opa" >> $GITHUB_PATH
     - run: npm ci
     - run: npm run types
     - run: npm test
