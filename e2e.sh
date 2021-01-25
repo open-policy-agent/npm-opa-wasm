@@ -13,7 +13,7 @@ npm run build
 
 echo "Running tests..."
 echo -n "When input.message == world, return hello == true "
-if npm start --silent -- '{ "mexssage": "world" }' | jq -e '.[0].result' >/dev/null; then
+if npm start --silent -- '{ "message": "world" }' | jq -e '.[0].result' >/dev/null; then
   echo "✔"
 else
   echo "✖"
