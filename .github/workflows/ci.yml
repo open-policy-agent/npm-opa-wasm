@@ -12,20 +12,48 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x, 14.x]
+        opa-version: [0.26.0]
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Checkout OPA v${{ matrix.opa-version }}
+      uses: actions/checkout@v2
+      with:
+        repository: open-policy-agent/opa
+        ref: v${{ matrix.opa-version }}
+        path: opa
+
+    - run: mkdir test/cases
+
+    - name: Prep OPA cases
+      working-directory: opa
+      # TODO(sr): This make target runs the tests, too, and we don't need
+      # this here. However, to untangle PRs, let's done some extra work now
+      # and fix this situation later.
+      run: make wasm-rego-test
+
+    # NOTE(sr): we've got to get rid of the opa checkout because the test
+    # runner would otherwise pick up any .js files it finds in there.
+    - name: Unpack OPA cases
+    - run: >
+        tar zxvf opa/.go/cache/testcases.tar.gz --exclude='*.js' -C test/cases &&
+        rm -rf opa/
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Install Open Policy Agent CLI
+
+    - name: Install Open Policy Agent ${{ matrix.opa-version }}
       run: >
         mkdir -p ${{ runner.tool_cache }}/opa &&
-        curl -sSL https://openpolicyagent.org/downloads/v0.26.0/opa_linux_amd64 -o ${{ runner.tool_cache }}/opa/opa &&
+        curl -sSL https://openpolicyagent.org/downloads/v${{ matrix.opa-version }}/opa_linux_amd64 -o ${{ runner.tool_cache }}/opa/opa &&
         chmod +x ${{ runner.tool_cache }}/opa/opa &&
         echo "${{ runner.tool_cache }}/opa" >> $GITHUB_PATH
     - run: npm ci
     - run: npm run types
     - run: npm test
+      env:
+        OPA_CASES: test/cases/
     - run: ./e2e.sh
