@@ -28,7 +28,7 @@ const { loadPolicy } = require("@open-policy-agent/opa-wasm");
 ```javascript
 loadPolicy(policyWasm)
 ```
-The `load_policy` request returns a Promise with the loaded policy.
+The `loadPolicy` function returns a Promise with the loaded policy.
 Typically this means loading it in an `async` function like:
 
 ```javascript
@@ -46,7 +46,7 @@ loadPolicy(policyWasm).then(policy => {
 ```
 
 The `policyWasm` needs to be either the raw byte array of
-the compiled policy wasm file, or a web assembly module.
+the compiled policy Wasm file, or a WebAssembly module.
 
 For example:
 
@@ -57,13 +57,13 @@ const policyWasm = fs.readFileSync('policy.wasm');
 ```
 
 Alternatively the bytes can be pulled in remotely from a `fetch` or in some
-cases (like CloudFlare Workers) the wasm binary can be loaded directly into the
+cases (like CloudFlare Workers) the Wasm binary can be loaded directly into the
 javascript context through external APIs.
 
 ### Evaluate the Policy
 
 The loaded policy object returned from `loadPolicy()` has a couple of important
-API's for policy evaluation:
+APIs for policy evaluation:
 
 `setData(obj)` -- Provide an external `data` document for policy evaluation. Requires a JSON serializable object.
 `evaluate(input)` -- Evaluates the policy using any loaded data and the supplied `input` document.
