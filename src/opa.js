@@ -27,7 +27,7 @@ function stringDecoder(mem) {
  */
 function _loadJSON(wasmInstance, memory, value) {
   if (value === undefined) {
-    throw "unable to load undefined value into memory";
+    return 0;
   }
 
   const str = utf8.encode(JSON.stringify(value));
