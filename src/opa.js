@@ -251,7 +251,7 @@ class LoadedPolicy {
   }
 
   /**
-   * eval_bool will evaluate the policy and return a boolean answer
+   * evalBool will evaluate the policy and return a boolean answer
    * depending on the return code from the policy evaluation.
    * @deprecated Use `evaluate` instead.
    * @param {object} input
