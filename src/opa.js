@@ -170,6 +170,16 @@ async function _loadPolicy(policy_wasm, memory) {
     },
   });
 
+  const abiVersionGlobal = wasm.instance.exports.opa_wasm_abi_version;
+  if (abiVersionGlobal !== undefined) {
+    const abiVersion = abiVersionGlobal.value;
+    if (abiVersion !== 1) {
+      throw `unsupported ABI version ${abiVersion}`;
+    }
+  } else {
+    console.error("opa_wasm_abi_version undefined"); // logs to stderr
+  }
+
   env.instance = wasm.instance ? wasm.instance : wasm;
 
   const builtins = _dumpJSON(
