@@ -110,16 +110,16 @@ function _builtinCall(wasmInstance, memory, builtins, builtin_id) {
  * It will return a Promise, depending on the input type the promise
  * resolves to both a compiled WebAssembly.Module and its first WebAssembly.Instance
  * or to the WebAssemblyInstance.
- * @param {BufferSource | WebAssembly.Module} policy_wasm
+ * @param {BufferSource | WebAssembly.Module} policyWasm
  * @param {WebAssembly.Memory} memory
  * @returns {Promise<WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance>}
  */
-async function _loadPolicy(policy_wasm, memory) {
+async function _loadPolicy(policyWasm, memory) {
   const addr2string = stringDecoder(memory);
 
   let env = {};
 
-  const wasm = await WebAssembly.instantiate(policy_wasm, {
+  const wasm = await WebAssembly.instantiate(policyWasm, {
     env: {
       memory: memory,
       opa_abort: function (addr) {
@@ -128,43 +128,43 @@ async function _loadPolicy(policy_wasm, memory) {
       opa_println: function (addr) {
         console.log(addr2string(addr))
       },
-      opa_builtin0: function (builtin_id, ctx) {
+      opa_builtin0: function (builtin_id, _ctx) {
         return _builtinCall(env.instance, memory, env.builtins, builtin_id);
       },
-      opa_builtin1: function (builtin_id, ctx, _1) {
-        return _builtinCall(env.instance, memory, env.builtins, builtin_id, _1);
+      opa_builtin1: function (builtin_id, _ctx, arg1) {
+        return _builtinCall(env.instance, memory, env.builtins, builtin_id, arg1);
       },
-      opa_builtin2: function (builtin_id, ctx, _1, _2) {
+      opa_builtin2: function (builtin_id, _ctx, arg1, arg2) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
           builtin_id,
-          _1,
-          _2,
+          arg1,
+          arg2,
         );
       },
-      opa_builtin3: function (builtin_id, ctx, _1, _2, _3) {
+      opa_builtin3: function (builtin_id, _ctx, arg1, arg2, arg3) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
           builtin_id,
-          _1,
-          _2,
-          _3,
+          arg1,
+          arg2,
+          arg3,
         );
       },
-      opa_builtin4: function (builtin_id, ctx, _1, _2, _3, _4) {
+      opa_builtin4: function (builtin_id, _ctx, arg1, arg2, arg3, arg4) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
           builtin_id,
-          _1,
-          _2,
-          _3,
-          _4,
+          arg1,
+          arg2,
+          arg3,
+          arg4,
         );
       },
     },
