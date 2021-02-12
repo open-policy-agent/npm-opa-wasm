@@ -27,7 +27,7 @@ function stringDecoder(mem) {
  */
 function _loadJSON(wasmInstance, memory, value) {
   if (value === undefined) {
-    throw "unable to load undefined value into memory";
+    return 0;
   }
 
   const str = utf8.encode(JSON.stringify(value));
@@ -251,7 +251,7 @@ class LoadedPolicy {
   }
 
   /**
-   * eval_bool will evaluate the policy and return a boolean answer
+   * evalBool will evaluate the policy and return a boolean answer
    * depending on the return code from the policy evaluation.
    * @deprecated Use `evaluate` instead.
    * @param {object} input
