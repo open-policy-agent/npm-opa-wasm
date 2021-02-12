@@ -36,7 +36,7 @@ jobs:
     # NOTE(sr): we've got to get rid of the opa checkout because the test
     # runner would otherwise pick up any .js files it finds in there.
     - name: Unpack OPA cases
-    - run: >
+      run: >
         tar zxvf opa/.go/cache/testcases.tar.gz --exclude='*.js' -C test/cases &&
         rm -rf opa/
 
