@@ -220,15 +220,21 @@ class LoadedPolicy {
     this.dataAddr = _loadJSON(this.wasmInstance, this.mem, {});
     this.baseHeapPtr = this.wasmInstance.exports.opa_heap_ptr_get();
     this.dataHeapPtr = this.baseHeapPtr;
+    this.entrypoints = _dumpJSON(this.wasmInstance, this.mem, this.wasmInstance.exports.entrypoints());
   }
 
   /**
    * Evaluates the loaded policy with the given input and
    * return the result set. This should be re-used for multiple evaluations
    * of the same policy with different inputs.
+   * 
+   * To call a non-default entrypoint in your WASM specify it as the second
+   * param. A list of entrypoints can be accessed with the `this.entrypoints`
+   * property. 
    * @param {object} input
+   * @param {number | string} entrypoint ID or name of the entrypoint to call (optional)
    */
-  evaluate(input) {
+  evaluate(input, entrypoint = null) {
     // Reset the heap pointer before each evaluation
     this.wasmInstance.exports.opa_heap_ptr_set(this.dataHeapPtr);
 
@@ -239,6 +245,21 @@ class LoadedPolicy {
     const ctxAddr = this.wasmInstance.exports.opa_eval_ctx_new();
     this.wasmInstance.exports.opa_eval_ctx_set_input(ctxAddr, inputAddr);
     this.wasmInstance.exports.opa_eval_ctx_set_data(ctxAddr, this.dataAddr);
+
+
+    if(entrypoint) {
+      if(typeof entrypoint === 'number') {
+        this.wasmInstance.exports.opa_eval_ctx_set_entrypoint(ctxAddr, entrypoint);
+      } else if (typeof entrypoint === 'string') {
+        if(this.entrypoints.hasOwnProperty(entrypoint)) {
+          this.wasmInstance.exports.opa_eval_ctx_set_entrypoint(ctxAddr, this.entrypoints[entrypoint]);
+        } else {
+          throw `entrypoint ${entrypoint} is not valid in this instance`;
+        }
+      } else {
+        throw `entrypoint value is an invalid type, must be either string or number`;
+      }
+    }
 
     // Actually evaluate the policy
     this.wasmInstance.exports.eval(ctxAddr);
