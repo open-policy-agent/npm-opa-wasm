@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x, 14.x]
-        opa-version: [0.28.0]
+        opa-version: [0.30.2]
 
     steps:
     - uses: actions/checkout@v2
