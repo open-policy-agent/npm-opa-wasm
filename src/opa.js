@@ -298,10 +298,15 @@ module.exports = {
    * Takes in either an ArrayBuffer or WebAssembly.Module
    * and will return a LoadedPolicy object which can be used to evaluate
    * the policy.
+   *
+   * To set custom memory size specify number of memory pages 
+   * as second param.
+   * Defaults to 5 pages (320KB).
    * @param {BufferSource | WebAssembly.Module} regoWasm
+   * @param {number} memorySize
    */
-  async loadPolicy(regoWasm) {
-    const memory = new WebAssembly.Memory({ initial: 5 });
+  async loadPolicy(regoWasm, memorySize = 5) {
+    const memory = new WebAssembly.Memory({ initial: memorySize });
     const policy = await _loadPolicy(regoWasm, memory);
     return new LoadedPolicy(policy, memory);
   }
