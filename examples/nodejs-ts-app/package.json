@@ -4,7 +4,7 @@
   "description": "demo app",
   "main": "app.js",
   "scripts": {
-    "build": "opa build --capabilities ../_shared/capabilities-v0.27.1.json -t wasm -e 'example/hello' ./example.rego && tar -xzf ./bundle.tar.gz /policy.wasm",
+    "build": "opa build -t wasm -e 'example/hello' ./example.rego && tar xzf ./bundle.tar.gz /policy.wasm",
     "start": "ts-node app.ts"
   },
   "dependencies": {
