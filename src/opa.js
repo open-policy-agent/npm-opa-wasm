@@ -55,10 +55,20 @@ function _loadJSON(wasmInstance, memory, value) {
  */
 function _dumpJSON(wasmInstance, memory, addr) {
   const rawAddr = wasmInstance.exports.opa_json_dump(addr);
+  return _dumpJSONRaw(memory, rawAddr);
+}
+
+/**
+ * Parses a JSON object from wasm instance's memory
+ * @param {WebAssembly.Memory} memory
+ * @param {number} addr
+ * @returns {object}
+ */
+function _dumpJSONRaw(memory, addr) {
   const buf = new Uint8Array(memory.buffer);
 
   let s = "";
-  let idx = rawAddr;
+  let idx = addr;
 
   while (buf[idx] !== 0) {
     s += String.fromCharCode(buf[idx++]);
@@ -112,7 +122,7 @@ function _builtinCall(wasmInstance, memory, builtins, builtin_id) {
  * or to the WebAssemblyInstance.
  * @param {BufferSource | WebAssembly.Module} policyWasm
  * @param {WebAssembly.Memory} memory
- * @returns {Promise<WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance>}
+ * @returns {Promise<{ policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }>}
  */
 async function _loadPolicy(policyWasm, memory) {
   const addr2string = stringDecoder(memory);
@@ -180,6 +190,14 @@ async function _loadPolicy(policyWasm, memory) {
     console.error("opa_wasm_abi_version undefined"); // logs to stderr
   }
 
+  const abiMinorVersionGlobal = wasm.instance.exports.opa_wasm_abi_minor_version;
+  let abiMinorVersion;
+  if (abiMinorVersionGlobal !== undefined) {
+    abiMinorVersion = abiMinorVersionGlobal.value;
+  } else {
+    console.error("opa_wasm_abi_minor_version undefined");
+  }
+
   env.instance = wasm.instance ? wasm.instance : wasm;
 
   const builtins = _dumpJSON(
@@ -195,7 +213,7 @@ async function _loadPolicy(policyWasm, memory) {
     env.builtins[builtins[key]] = key;
   }
 
-  return wasm;
+  return { policy: wasm, minorVersion: abiMinorVersion };
 }
 
 /**
@@ -209,7 +227,8 @@ class LoadedPolicy {
    * @param {WebAssembly.WebAssemblyInstantiatedSource} policy
    * @param {WebAssembly.Memory} memory
    */
-  constructor(policy, memory) {
+  constructor(policy, memory, minorVersion) {
+    this.minorVersion = minorVersion;
     this.mem = memory;
 
     // Depending on how the wasm was instantiated "policy" might be a
@@ -234,7 +253,41 @@ class LoadedPolicy {
    * @param {object} input
    * @param {number | string} entrypoint ID or name of the entrypoint to call (optional)
    */
-  evaluate(input, entrypoint = null) {
+  evaluate(input, entrypoint = 0) {
+    // determine entrypoint ID
+    if (typeof entrypoint === 'number') {
+      // used as-is
+    } else if (typeof entrypoint === 'string') {
+      if(this.entrypoints.hasOwnProperty(entrypoint)) {
+        entrypoint = this.entrypoints[entrypoint];
+      } else {
+        throw `entrypoint ${entrypoint} is not valid in this instance`;
+      }
+    } else {
+      throw `entrypoint value is an invalid type, must be either string or number`;
+    }
+
+    // ABI 1.2 fastpath
+    if (this.minorVersion >= 2) {
+      // write input into memory, adjust heap pointer
+      let inputLen = 0;
+      let inputAddr = 0;
+      if (input) {
+          const inp = JSON.stringify(input);
+          const buf = new Uint8Array(this.mem.buffer);
+          inputAddr = this.dataHeapPtr;
+          inputLen = inp.length;
+
+          for (let i = 0; i < inputLen; i++) {
+              buf[inputAddr + i] = inp.charCodeAt(i);
+          }
+          this.dataHeapPtr = inputAddr + inputLen;
+      }
+
+      const ret = this.wasmInstance.exports.opa_eval(0, entrypoint, this.dataAddr, inputAddr, inputLen, this.dataHeapPtr, 0);
+      return _dumpJSONRaw(this.mem, ret);
+    }
+
     // Reset the heap pointer before each evaluation
     this.wasmInstance.exports.opa_heap_ptr_set(this.dataHeapPtr);
 
@@ -245,21 +298,8 @@ class LoadedPolicy {
     const ctxAddr = this.wasmInstance.exports.opa_eval_ctx_new();
     this.wasmInstance.exports.opa_eval_ctx_set_input(ctxAddr, inputAddr);
     this.wasmInstance.exports.opa_eval_ctx_set_data(ctxAddr, this.dataAddr);
+    this.wasmInstance.exports.opa_eval_ctx_set_entrypoint(ctxAddr, entrypoint);
 
-
-    if(entrypoint) {
-      if(typeof entrypoint === 'number') {
-        this.wasmInstance.exports.opa_eval_ctx_set_entrypoint(ctxAddr, entrypoint);
-      } else if (typeof entrypoint === 'string') {
-        if(this.entrypoints.hasOwnProperty(entrypoint)) {
-          this.wasmInstance.exports.opa_eval_ctx_set_entrypoint(ctxAddr, this.entrypoints[entrypoint]);
-        } else {
-          throw `entrypoint ${entrypoint} is not valid in this instance`;
-        }
-      } else {
-        throw `entrypoint value is an invalid type, must be either string or number`;
-      }
-    }
 
     // Actually evaluate the policy
     this.wasmInstance.exports.eval(ctxAddr);
@@ -307,7 +347,7 @@ module.exports = {
    */
   async loadPolicy(regoWasm, memorySize = 5) {
     const memory = new WebAssembly.Memory({ initial: memorySize });
-    const policy = await _loadPolicy(regoWasm, memory);
-    return new LoadedPolicy(policy, memory);
+    const { policy, minorVersion } = await _loadPolicy(regoWasm, memory);
+    return new LoadedPolicy(policy, memory, minorVersion);
   }
 }
