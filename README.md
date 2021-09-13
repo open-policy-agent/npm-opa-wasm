@@ -95,11 +95,11 @@ loadPolicy(policyWasm).then(policy => {
   [https://www.openpolicyagent.org/docs/latest/wasm/](https://www.openpolicyagent.org/docs/latest/wasm/)
   for more details.
 
-## Writing the policy
+### Writing the policy
 
 See [https://www.openpolicyagent.org/docs/latest/how-do-i-write-policies/](https://www.openpolicyagent.org/docs/latest/how-do-i-write-policies/)
 
-## Compiling the policy
+### Compiling the policy
 
 Either use the [Compile REST API](https://www.openpolicyagent.org/docs/latest/rest-api/#compile-api) or `opa build` CLI tool.
 
@@ -113,3 +113,22 @@ Which is compiling the `example.rego` policy file with the result set to
 binary included. See [./examples](./examples) for a more comprehensive example.
 
 See `opa build --help` for more details.
+
+## Development
+
+### Lint and Format checks
+
+This project is using Deno's
+[lint](https://deno.land/manual@v1.14.0/tools/linter) and
+[formatter](https://deno.land/manual@v1.14.0/tools/formatter) tools in CI. With
+`deno`
+[installed locally](https://deno.land/manual@v1.14.0/getting_started/installation),
+the same checks can be invoked using `npm`:
+
+- `npm run lint`
+- `npm run fmt` -- this will fix the formatting
+- `npm run fmt:check` -- this happens in CI
+
+All of these operate on git-tracked files, so make sure you've committed the
+code you'd like to see checked. Alternatively, you can invoke
+`deno lint my_new_file.js` directly, too.

@@ -5,6 +5,9 @@
   "main": "src/opa.js",
   "types": "types/opa.d.ts",
   "scripts": {
+    "lint": "git ls-files | xargs deno lint",
+    "fmt:check": "git ls-files | xargs deno fmt --check",
+    "fmt": "git ls-files | xargs deno fmt",
     "test": "jest --verbose",
     "types": "tsc"
   },
