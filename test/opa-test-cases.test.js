@@ -28,7 +28,7 @@ function walk(dir) {
 }
 
 function modulesToTempFiles(modules) {
-  let ret = [];
+  const ret = [];
   for (const mod of modules) {
     const tmpFile = tmp.fileSync();
     writeFileSync(tmpFile.fd, mod);

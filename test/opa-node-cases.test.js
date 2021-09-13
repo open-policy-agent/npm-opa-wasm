@@ -11,7 +11,7 @@ if (path === undefined) {
   files = readdirSync(path);
 }
 let numFiles = 0;
-var testCases = [];
+const testCases = [];
 
 files.forEach(file => {
   if (file.endsWith('.json')) {
@@ -37,23 +37,23 @@ testCases.forEach(tc => {
     input,
     data,
     note,
-    want_defined,
-    want_result,
-    want_error,
-    skip_reason,
+    want_defined: wantDefined,
+    want_result: wantResult,
+    want_error: wantError,
+    skip_reason: skipReason,
     skip
   } = tc;
   describe(note, () => {
     if (skip) {
-      test.skip(`skip ${note}: ${skip_reason}`, () => {});
+      test.skip(`skip ${note}: ${skipReason}`, () => {});
       return;
     }
 
-    if (want_error) {
-      if('errors', async() => {
+    if (wantError) {
+      it('errors', async() => {
         const policy = await loadPolicy(Buffer.from(wasm, 'base64'));
         policy.setData(data);
-        expect(() => policy.evaluate(input)).toThrow(want_error);
+        expect(() => policy.evaluate(input)).toThrow(wantError);
       });
       return;
     }
@@ -62,16 +62,16 @@ testCases.forEach(tc => {
       const policy = await loadPolicy(Buffer.from(wasm, 'base64'));
       policy.setData(data || {});
       const result = policy.evaluate(input);
-      if (want_defined !== undefined) {
-        if (want_defined) {
+      if (wantDefined !== undefined) {
+        if (wantDefined) {
           expect(result.length).toBeGreaterThan(0);
         } else {
           expect(result.length).toBe(0);
         }
       }
-      if (want_result !== undefined) {
-        expect(result.length).toEqual(want_result.length);
-        expect(result).toEqual(expect.arrayContaining(want_result));
+      if (wantResult !== undefined) {
+        expect(result.length).toEqual(wantResult.length);
+        expect(result).toEqual(expect.arrayContaining(wantResult));
       }
     });
   });

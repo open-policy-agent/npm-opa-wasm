@@ -87,22 +87,22 @@ const builtinFuncs = builtIns;
  * @param {{ [builtinId: number]: string }} builtins
  * @param {string} builtin_id
  */
-function _builtinCall(wasmInstance, memory, builtins, builtin_id) {
-  const builtInName = builtins[builtin_id];
+function _builtinCall(wasmInstance, memory, builtins, builtinId) {
+  const builtInName = builtins[builtinId];
   const impl = builtinFuncs[builtInName];
 
   if (impl === undefined) {
     throw {
       message:
         "not implemented: built-in function " +
-        builtin_id +
+        builtinId +
         ": " +
-        builtins[builtin_id],
+        builtins[builtinId],
     };
   }
 
-  var argArray = Array.prototype.slice.apply(arguments);
-  let args = [];
+  const argArray = Array.prototype.slice.apply(arguments);
+  const args = [];
 
   for (let i = 4; i < argArray.length; i++) {
     const jsArg = _dumpJSON(wasmInstance, memory, argArray[i]);
@@ -127,50 +127,50 @@ function _builtinCall(wasmInstance, memory, builtins, builtin_id) {
 async function _loadPolicy(policyWasm, memory) {
   const addr2string = stringDecoder(memory);
 
-  let env = {};
+  const env = {};
 
   const wasm = await WebAssembly.instantiate(policyWasm, {
     env: {
-      memory: memory,
+      memory,
       opa_abort: function (addr) {
         throw addr2string(addr);
       },
       opa_println: function (addr) {
         console.log(addr2string(addr))
       },
-      opa_builtin0: function (builtin_id, _ctx) {
-        return _builtinCall(env.instance, memory, env.builtins, builtin_id);
+      opa_builtin0: function (builtinId, _ctx) {
+        return _builtinCall(env.instance, memory, env.builtins, builtinId);
       },
-      opa_builtin1: function (builtin_id, _ctx, arg1) {
-        return _builtinCall(env.instance, memory, env.builtins, builtin_id, arg1);
+      opa_builtin1: function (builtinId, _ctx, arg1) {
+        return _builtinCall(env.instance, memory, env.builtins, builtinId, arg1);
       },
-      opa_builtin2: function (builtin_id, _ctx, arg1, arg2) {
+      opa_builtin2: function (builtinId, _ctx, arg1, arg2) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
-          builtin_id,
+          builtinId,
           arg1,
           arg2,
         );
       },
-      opa_builtin3: function (builtin_id, _ctx, arg1, arg2, arg3) {
+      opa_builtin3: function (builtinId, _ctx, arg1, arg2, arg3) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
-          builtin_id,
+          builtinId,
           arg1,
           arg2,
           arg3,
         );
       },
-      opa_builtin4: function (builtin_id, _ctx, arg1, arg2, arg3, arg4) {
+      opa_builtin4: function (builtinId, _ctx, arg1, arg2, arg3, arg4) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
-          builtin_id,
+          builtinId,
           arg1,
           arg2,
           arg3,
@@ -209,7 +209,7 @@ async function _loadPolicy(policyWasm, memory) {
   /** @type {typeof builtIns} */
   env.builtins = {};
 
-  for (var key of Object.keys(builtins)) {
+  for (const key of Object.keys(builtins)) {
     env.builtins[builtins[key]] = key;
   }
 
@@ -258,7 +258,7 @@ class LoadedPolicy {
     if (typeof entrypoint === 'number') {
       // used as-is
     } else if (typeof entrypoint === 'string') {
-      if(this.entrypoints.hasOwnProperty(entrypoint)) {
+      if(Object.prototype.hasOwnProperty.call(this.entrypoints, entrypoint)) {
         entrypoint = this.entrypoints[entrypoint];
       } else {
         throw `entrypoint ${entrypoint} is not valid in this instance`;
