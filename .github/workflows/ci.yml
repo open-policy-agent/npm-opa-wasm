@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x, 14.x]
-        opa-version: [0.30.2]
+        opa-version: [0.30.2, 0.31.0] # 0.30.2 has ABI 1.1, 0.31.0 has ABI 1.2
 
     steps:
     - uses: actions/checkout@v2
