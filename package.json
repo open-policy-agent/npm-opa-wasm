@@ -5,7 +5,7 @@
   "main": "src/opa.js",
   "types": "types/opa.d.ts",
   "scripts": {
-    "test": "jest",
+    "test": "jest --verbose",
     "types": "tsc"
   },
   "repository": {
@@ -28,7 +28,9 @@
     "typescript": "^3.9.2"
   },
   "dependencies": {
+    "smart-deep-sort": "^1.0.2",
     "sprintf-js": "^1.1.2",
+    "tmp": "^0.2.1",
     "utf8": "^3.0.0"
   }
 }

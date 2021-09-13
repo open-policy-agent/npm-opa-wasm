@@ -38,6 +38,7 @@ jobs:
     - name: Unpack OPA cases
       run: >
         tar zxvf opa/.go/cache/testcases.tar.gz --exclude='*.js' -C test/cases &&
+        mv opa/test/cases/testdata testdata &&
         rm -rf opa/
 
     - name: Use Node.js ${{ matrix.node-version }}
@@ -56,4 +57,5 @@ jobs:
     - run: npm test
       env:
         OPA_CASES: test/cases/
+        OPA_TEST_CASES: testdata
     - run: ./e2e.sh
