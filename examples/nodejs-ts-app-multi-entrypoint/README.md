@@ -1,7 +1,7 @@
 # Multi-entrypoint OPA-WASM node demo script
 
-This script demos loading a WASM OPA file and simulates 1,000,000 evaluations
-on a few different entrypoints to demonstrate how entrypoints can be used.
+This script demos loading a WASM OPA file and simulates 1,000,000 evaluations on
+a few different entrypoints to demonstrate how entrypoints can be used.
 
 ## Install dependencies
 
@@ -11,9 +11,9 @@ npm install
 
 ## Build the WebAssembly binary for the example policies
 
-There are two example policies located in the ./policies directory, these
-are compiled into a WASM. Look in the package.json to see how the entrypoints
-are defined.
+There are two example policies located in the ./policies directory, these are
+compiled into a WASM. Look in the package.json to see how the entrypoints are
+defined.
 
 > Tested with OPA v0.27.1
 
@@ -28,6 +28,7 @@ npm start
 ```
 
 Sample Output
+
 ```
 Running multi entrypoint demo suite
 Iterations: 100000 iterations of 10 inputs for 1000000 total evals per entrypoint

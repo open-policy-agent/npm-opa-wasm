@@ -2,7 +2,7 @@
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
 const builtIns = require("./builtins/index");
-const utf8 = require('utf8');
+const utf8 = require("utf8");
 
 /**
  * @param {WebAssembly.Memory} mem
@@ -87,22 +87,21 @@ const builtinFuncs = builtIns;
  * @param {{ [builtinId: number]: string }} builtins
  * @param {string} builtin_id
  */
-function _builtinCall(wasmInstance, memory, builtins, builtin_id) {
-  const builtInName = builtins[builtin_id];
+function _builtinCall(wasmInstance, memory, builtins, builtinId) {
+  const builtInName = builtins[builtinId];
   const impl = builtinFuncs[builtInName];
 
   if (impl === undefined) {
     throw {
-      message:
-        "not implemented: built-in function " +
-        builtin_id +
+      message: "not implemented: built-in function " +
+        builtinId +
         ": " +
-        builtins[builtin_id],
+        builtins[builtinId],
     };
   }
 
-  var argArray = Array.prototype.slice.apply(arguments);
-  let args = [];
+  const argArray = Array.prototype.slice.apply(arguments);
+  const args = [];
 
   for (let i = 4; i < argArray.length; i++) {
     const jsArg = _dumpJSON(wasmInstance, memory, argArray[i]);
@@ -127,50 +126,56 @@ function _builtinCall(wasmInstance, memory, builtins, builtin_id) {
 async function _loadPolicy(policyWasm, memory) {
   const addr2string = stringDecoder(memory);
 
-  let env = {};
+  const env = {};
 
   const wasm = await WebAssembly.instantiate(policyWasm, {
     env: {
-      memory: memory,
+      memory,
       opa_abort: function (addr) {
         throw addr2string(addr);
       },
       opa_println: function (addr) {
-        console.log(addr2string(addr))
+        console.log(addr2string(addr));
       },
-      opa_builtin0: function (builtin_id, _ctx) {
-        return _builtinCall(env.instance, memory, env.builtins, builtin_id);
+      opa_builtin0: function (builtinId, _ctx) {
+        return _builtinCall(env.instance, memory, env.builtins, builtinId);
       },
-      opa_builtin1: function (builtin_id, _ctx, arg1) {
-        return _builtinCall(env.instance, memory, env.builtins, builtin_id, arg1);
-      },
-      opa_builtin2: function (builtin_id, _ctx, arg1, arg2) {
+      opa_builtin1: function (builtinId, _ctx, arg1) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
-          builtin_id,
+          builtinId,
+          arg1,
+        );
+      },
+      opa_builtin2: function (builtinId, _ctx, arg1, arg2) {
+        return _builtinCall(
+          env.instance,
+          memory,
+          env.builtins,
+          builtinId,
           arg1,
           arg2,
         );
       },
-      opa_builtin3: function (builtin_id, _ctx, arg1, arg2, arg3) {
+      opa_builtin3: function (builtinId, _ctx, arg1, arg2, arg3) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
-          builtin_id,
+          builtinId,
           arg1,
           arg2,
           arg3,
         );
       },
-      opa_builtin4: function (builtin_id, _ctx, arg1, arg2, arg3, arg4) {
+      opa_builtin4: function (builtinId, _ctx, arg1, arg2, arg3, arg4) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
-          builtin_id,
+          builtinId,
           arg1,
           arg2,
           arg3,
@@ -190,7 +195,8 @@ async function _loadPolicy(policyWasm, memory) {
     console.error("opa_wasm_abi_version undefined"); // logs to stderr
   }
 
-  const abiMinorVersionGlobal = wasm.instance.exports.opa_wasm_abi_minor_version;
+  const abiMinorVersionGlobal =
+    wasm.instance.exports.opa_wasm_abi_minor_version;
   let abiMinorVersion;
   if (abiMinorVersionGlobal !== undefined) {
     abiMinorVersion = abiMinorVersionGlobal.value;
@@ -209,7 +215,7 @@ async function _loadPolicy(policyWasm, memory) {
   /** @type {typeof builtIns} */
   env.builtins = {};
 
-  for (var key of Object.keys(builtins)) {
+  for (const key of Object.keys(builtins)) {
     env.builtins[builtins[key]] = key;
   }
 
@@ -239,26 +245,30 @@ class LoadedPolicy {
     this.dataAddr = _loadJSON(this.wasmInstance, this.mem, {});
     this.baseHeapPtr = this.wasmInstance.exports.opa_heap_ptr_get();
     this.dataHeapPtr = this.baseHeapPtr;
-    this.entrypoints = _dumpJSON(this.wasmInstance, this.mem, this.wasmInstance.exports.entrypoints());
+    this.entrypoints = _dumpJSON(
+      this.wasmInstance,
+      this.mem,
+      this.wasmInstance.exports.entrypoints(),
+    );
   }
 
   /**
    * Evaluates the loaded policy with the given input and
    * return the result set. This should be re-used for multiple evaluations
    * of the same policy with different inputs.
-   * 
+   *
    * To call a non-default entrypoint in your WASM specify it as the second
    * param. A list of entrypoints can be accessed with the `this.entrypoints`
-   * property. 
+   * property.
    * @param {object} input
    * @param {number | string} entrypoint ID or name of the entrypoint to call (optional)
    */
   evaluate(input, entrypoint = 0) {
     // determine entrypoint ID
-    if (typeof entrypoint === 'number') {
+    if (typeof entrypoint === "number") {
       // used as-is
-    } else if (typeof entrypoint === 'string') {
-      if(this.entrypoints.hasOwnProperty(entrypoint)) {
+    } else if (typeof entrypoint === "string") {
+      if (Object.prototype.hasOwnProperty.call(this.entrypoints, entrypoint)) {
         entrypoint = this.entrypoints[entrypoint];
       } else {
         throw `entrypoint ${entrypoint} is not valid in this instance`;
@@ -273,18 +283,26 @@ class LoadedPolicy {
       let inputLen = 0;
       let inputAddr = 0;
       if (input) {
-          const inp = JSON.stringify(input);
-          const buf = new Uint8Array(this.mem.buffer);
-          inputAddr = this.dataHeapPtr;
-          inputLen = inp.length;
+        const inp = JSON.stringify(input);
+        const buf = new Uint8Array(this.mem.buffer);
+        inputAddr = this.dataHeapPtr;
+        inputLen = inp.length;
 
-          for (let i = 0; i < inputLen; i++) {
-              buf[inputAddr + i] = inp.charCodeAt(i);
-          }
-          this.dataHeapPtr = inputAddr + inputLen;
+        for (let i = 0; i < inputLen; i++) {
+          buf[inputAddr + i] = inp.charCodeAt(i);
+        }
+        this.dataHeapPtr = inputAddr + inputLen;
       }
 
-      const ret = this.wasmInstance.exports.opa_eval(0, entrypoint, this.dataAddr, inputAddr, inputLen, this.dataHeapPtr, 0);
+      const ret = this.wasmInstance.exports.opa_eval(
+        0,
+        entrypoint,
+        this.dataAddr,
+        inputAddr,
+        inputLen,
+        this.dataHeapPtr,
+        0,
+      );
       return _dumpJSONRaw(this.mem, ret);
     }
 
@@ -299,7 +317,6 @@ class LoadedPolicy {
     this.wasmInstance.exports.opa_eval_ctx_set_input(ctxAddr, inputAddr);
     this.wasmInstance.exports.opa_eval_ctx_set_data(ctxAddr, this.dataAddr);
     this.wasmInstance.exports.opa_eval_ctx_set_entrypoint(ctxAddr, entrypoint);
-
 
     // Actually evaluate the policy
     this.wasmInstance.exports.eval(ctxAddr);
@@ -339,7 +356,7 @@ module.exports = {
    * and will return a LoadedPolicy object which can be used to evaluate
    * the policy.
    *
-   * To set custom memory size specify number of memory pages 
+   * To set custom memory size specify number of memory pages
    * as second param.
    * Defaults to 5 pages (320KB).
    * @param {BufferSource | WebAssembly.Module} regoWasm
@@ -349,5 +366,5 @@ module.exports = {
     const memory = new WebAssembly.Memory({ initial: memorySize });
     const { policy, minorVersion } = await _loadPolicy(regoWasm, memory);
     return new LoadedPolicy(policy, memory, minorVersion);
-  }
-}
+  },
+};

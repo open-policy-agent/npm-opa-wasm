@@ -1,4 +1,4 @@
-const vsprintf = require('sprintf-js').vsprintf
+const vsprintf = require("sprintf-js").vsprintf;
 
 sprintf = (s, values) => vsprintf(s, values);
 
