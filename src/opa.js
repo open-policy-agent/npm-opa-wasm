@@ -2,7 +2,7 @@
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
 const builtIns = require("./builtins/index");
-const utf8 = require("utf8");
+const util = require("util");
 
 /**
  * @param {WebAssembly.Memory} mem
@@ -30,15 +30,15 @@ function _loadJSON(wasmInstance, memory, value) {
     return 0;
   }
 
-  const str = utf8.encode(JSON.stringify(value));
-  const rawAddr = wasmInstance.exports.opa_malloc(str.length);
-  const buf = new Uint8Array(memory.buffer);
+  const valueAsText = JSON.stringify(value);
+  const utf8View = new util.TextEncoder().encode(valueAsText);
+  const utf8ViewLen = utf8View.byteLength;
 
-  for (let i = 0; i < str.length; i++) {
-    buf[rawAddr + i] = str.charCodeAt(i);
-  }
+  const rawAddr = wasmInstance.exports.opa_malloc(utf8ViewLen);
+  const memoryBuffer = new Uint8Array(memory.buffer);
+  memoryBuffer.set(utf8View, rawAddr);
 
-  const parsedAddr = wasmInstance.exports.opa_json_parse(rawAddr, str.length);
+  const parsedAddr = wasmInstance.exports.opa_json_parse(rawAddr, utf8ViewLen);
 
   if (parsedAddr === 0) {
     throw "failed to parse json value";
@@ -67,14 +67,16 @@ function _dumpJSON(wasmInstance, memory, addr) {
 function _dumpJSONRaw(memory, addr) {
   const buf = new Uint8Array(memory.buffer);
 
-  let s = "";
   let idx = addr;
 
   while (buf[idx] !== 0) {
-    s += String.fromCharCode(buf[idx++]);
+    idx++;
   }
 
-  return JSON.parse(utf8.decode(s));
+  const utf8View = new Uint8Array(memory.buffer, addr, idx - addr);
+  const jsonAsText = new util.TextDecoder().decode(utf8View);
+
+  return JSON.parse(jsonAsText);
 }
 
 const builtinFuncs = builtIns;

@@ -92,81 +92,83 @@ if (path === undefined) {
   describe("opa external test cases", () => {
     test.todo("not found, set OPA_TEST_CASES env var");
   });
-}
-
-for (const file of walk(path)) {
-  describe(file, () => {
-    const doc = yaml.load(readFileSync(file, "utf8"));
-    cases:
-    for (const tc of doc.cases) {
-      const reason = exceptions[tc.note];
-      if (reason) {
-        test.todo(`${tc.note}: ${reason}`);
-        continue cases;
-      }
-      if (tc.input_term) {
-        let fail = false;
-        try {
-          JSON.parse(tc.input_term);
-        } catch (_) {
-          fail = true;
-        }
-        if (fail) {
-          test.todo(`${tc.note}: input_term value format not supported`);
+} else {
+  for (const file of walk(path)) {
+    describe(file, () => {
+      const doc = yaml.load(readFileSync(file, "utf8"));
+      cases:
+      for (const tc of doc.cases) {
+        const reason = exceptions[tc.note];
+        if (reason) {
+          test.todo(`${tc.note}: ${reason}`);
           continue cases;
         }
-      }
-      if (tc.want_result && tc.want_result.length > 1) {
-        test.todo(
-          `${tc.note}: more than one expected result not supported: ${
-            tc
-              .want_result && tc.want_result.length
-          }`,
-        );
-        continue cases;
-      }
-      let expected = tc.want_result;
-
-      const { wasm, skip } = compileToWasm(tc.modules, tc.query);
-      if (skip) {
-        test.todo(`${tc.note}: ${skip}`);
-        continue cases;
-      }
-
-      it(tc.note, async () => {
-        const buf = readFileSync(wasm);
-        const policy = await loadPolicy(buf);
-        if (tc.data) {
-          policy.setData(tc.data);
-        }
-        let input = tc.input || tc.input_term;
-        if (typeof input === "string") {
-          input = JSON.parse(input);
-        }
-
-        if ((tc.want_error || tc.want_error_code) && !tc.strict_error) {
-          expect(() => {
-            policy.evaluate(input);
-          }).toThrow();
-          return;
-        }
-
-        let res;
-        expect(() => {
-          res = policy.evaluate(input);
-        }).not.toThrow();
-
-        if (expected) {
-          expect(res).toHaveLength(expected.length);
-          if (tc.sort_bindings) {
-            res = { result: sort(res[0].result) };
-            expected = { x: sort(expected[0].x) };
+        if (tc.input_term) {
+          let fail = false;
+          try {
+            JSON.parse(tc.input_term);
+          } catch (_) {
+            fail = true;
           }
-          expect(res[0] && res[0].result).toEqual(expected[0] && expected[0].x);
-        } else {
-          expect(res).toHaveLength(0);
+          if (fail) {
+            test.todo(`${tc.note}: input_term value format not supported`);
+            continue cases;
+          }
         }
-      });
-    }
-  });
+        if (tc.want_result && tc.want_result.length > 1) {
+          test.todo(
+            `${tc.note}: more than one expected result not supported: ${
+              tc
+                .want_result && tc.want_result.length
+            }`,
+          );
+          continue cases;
+        }
+        let expected = tc.want_result;
+
+        const { wasm, skip } = compileToWasm(tc.modules, tc.query);
+        if (skip) {
+          test.todo(`${tc.note}: ${skip}`);
+          continue cases;
+        }
+
+        it(tc.note, async () => {
+          const buf = readFileSync(wasm);
+          const policy = await loadPolicy(buf);
+          if (tc.data) {
+            policy.setData(tc.data);
+          }
+          let input = tc.input || tc.input_term;
+          if (typeof input === "string") {
+            input = JSON.parse(input);
+          }
+
+          if ((tc.want_error || tc.want_error_code) && !tc.strict_error) {
+            expect(() => {
+              policy.evaluate(input);
+            }).toThrow();
+            return;
+          }
+
+          let res;
+          expect(() => {
+            res = policy.evaluate(input);
+          }).not.toThrow();
+
+          if (expected) {
+            expect(res).toHaveLength(expected.length);
+            if (tc.sort_bindings) {
+              res = { result: sort(res[0].result) };
+              expected = { x: sort(expected[0].x) };
+            }
+            expect(res[0] && res[0].result).toEqual(
+              expected[0] && expected[0].x,
+            );
+          } else {
+            expect(res).toHaveLength(0);
+          }
+        });
+      }
+    });
+  }
 }
