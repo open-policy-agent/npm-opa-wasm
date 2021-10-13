@@ -46,8 +46,10 @@ const inputs = [
 
   console.log(`Running multi entrypoint demo suite`);
   console.log(
-    `Iterations: ${iterations} iterations of ${inputs.length} inputs for ${iterations *
-      inputs.length} total evals per entrypoint`,
+    `Iterations: ${iterations} iterations of ${inputs.length} inputs for ${
+      iterations *
+      inputs.length
+    } total evals per entrypoint`,
   );
 
   // Run the default entrypoint first

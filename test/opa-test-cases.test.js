@@ -41,8 +41,10 @@ function modulesToTempFiles(modules) {
 function compileToWasm(modules, query) {
   if (modules && modules.length < 1) {
     return {
-      skip: `empty modules cases are not supported (got ${modules &&
-        modules.length})`,
+      skip: `empty modules cases are not supported (got ${
+        modules &&
+        modules.length
+      })`,
     };
   }
 
@@ -116,8 +118,10 @@ for (const file of walk(path)) {
       }
       if (tc.want_result && tc.want_result.length > 1) {
         test.todo(
-          `${tc.note}: more than one expected result not supported: ${tc
-            .want_result && tc.want_result.length}`,
+          `${tc.note}: more than one expected result not supported: ${
+            tc
+              .want_result && tc.want_result.length
+          }`,
         );
         continue cases;
       }
