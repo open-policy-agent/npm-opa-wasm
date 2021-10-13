@@ -1,0 +1,77 @@
+{
+  "static": {
+    "roles": {
+      "1": {
+        "id": 1,
+        "name": "superuser",
+        "permissions": [
+          {
+            "id": "account_billing_information",
+            "priv": "view",
+            "type": "ui_element"
+          },
+          {
+            "id": "account_billing_information_1",
+            "priv": "execute",
+            "type": "rest_api"
+          },
+          {
+            "id": "account_billing_information_2",
+            "priv": "manage",
+            "type": "component"
+          },
+          {
+            "id": "account_billing_information_3",
+            "priv": "view",
+            "type": "ui_element"
+          },
+          {
+            "id": "account_billing_information_4",
+            "priv": "execute",
+            "type": "ui_element"
+          },
+          {
+            "id": "account_billing_information_5",
+            "priv": "execute",
+            "type": "rest_api"
+          },
+          {
+            "id": "account_billing_information_6",
+            "priv": "execute",
+            "type": "ui_element"
+          },
+          {
+            "id": "account_billing_information_7",
+            "priv": "view",
+            "type": "ui_element"
+          },
+          {
+            "id": "account_billing_information_8",
+            "priv": "view",
+            "type": "ui_element"
+          },
+          {
+            "id": "account_billing_information_9",
+            "priv": "execute",
+            "type": "rest_api"
+          },
+          {
+            "id": "account_billing_information_10",
+            "priv": "exercise",
+            "type": "rest_api"
+          },
+          {
+            "id": "account_billing_information_11",
+            "priv": "invoke",
+            "type": "rest_api"
+          },
+          {
+            "id": "account_billing_information_12",
+            "priv": "view",
+            "type": "ui_element"
+          }
+        ]
+      }
+    }
+  }
+}
