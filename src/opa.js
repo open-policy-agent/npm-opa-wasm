@@ -22,7 +22,7 @@ function stringDecoder(mem) {
  * Stringifies and loads an object into OPA's Memory
  * @param {WebAssembly.Instance} wasmInstance
  * @param {WebAssembly.Memory} memory
- * @param {any} value
+ * @param {any | ArrayBuffer} value data as `object`, literal primitive or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
  * @returns {number}
  */
 function _loadJSON(wasmInstance, memory, value) {
@@ -30,15 +30,20 @@ function _loadJSON(wasmInstance, memory, value) {
     return 0;
   }
 
-  const valueAsText = JSON.stringify(value);
-  const utf8View = new util.TextEncoder().encode(valueAsText);
-  const utf8ViewLen = utf8View.byteLength;
+  let valueBuf;
+  if (value instanceof ArrayBuffer) {
+    valueBuf = new Uint8Array(value);
+  } else {
+    const valueAsText = JSON.stringify(value);
+    valueBuf = new util.TextEncoder().encode(valueAsText);
+  }
 
-  const rawAddr = wasmInstance.exports.opa_malloc(utf8ViewLen);
+  const valueBufLen = valueBuf.byteLength;
+  const rawAddr = wasmInstance.exports.opa_malloc(valueBufLen);
   const memoryBuffer = new Uint8Array(memory.buffer);
-  memoryBuffer.set(utf8View, rawAddr);
+  memoryBuffer.set(valueBuf, rawAddr);
 
-  const parsedAddr = wasmInstance.exports.opa_json_parse(rawAddr, utf8ViewLen);
+  const parsedAddr = wasmInstance.exports.opa_json_parse(rawAddr, valueBufLen);
 
   if (parsedAddr === 0) {
     throw "failed to parse json value";
@@ -262,7 +267,7 @@ class LoadedPolicy {
    * To call a non-default entrypoint in your WASM specify it as the second
    * param. A list of entrypoints can be accessed with the `this.entrypoints`
    * property.
-   * @param {object} input
+   * @param {any | ArrayBuffer} input input to be evaluated in form of `object`, literal primitive or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
    * @param {number | string} entrypoint ID or name of the entrypoint to call (optional)
    */
   evaluate(input, entrypoint = 0) {
@@ -282,17 +287,21 @@ class LoadedPolicy {
     // ABI 1.2 fastpath
     if (this.minorVersion >= 2) {
       // write input into memory, adjust heap pointer
+      let inputBuf = null;
       let inputLen = 0;
       let inputAddr = 0;
       if (input) {
-        const inp = JSON.stringify(input);
-        const buf = new Uint8Array(this.mem.buffer);
-        inputAddr = this.dataHeapPtr;
-        inputLen = inp.length;
-
-        for (let i = 0; i < inputLen; i++) {
-          buf[inputAddr + i] = inp.charCodeAt(i);
+        if (input instanceof ArrayBuffer) {
+          inputBuf = new Uint8Array(input);
+        } else {
+          const inputAsText = JSON.stringify(input);
+          inputBuf = new util.TextEncoder().encode(inputAsText);
         }
+
+        inputLen = inputBuf.byteLength;
+        const buf = new Uint8Array(this.mem.buffer);
+        buf.set(inputBuf, this.dataHeapPtr);
+        inputAddr = this.dataHeapPtr;
         this.dataHeapPtr = inputAddr + inputLen;
       }
 
@@ -343,7 +352,7 @@ class LoadedPolicy {
 
   /**
    * Loads data for use in subsequent evaluations.
-   * @param {object} data
+   * @param {object | ArrayBuffer} data  data in form of `object` or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
    */
   setData(data) {
     this.wasmInstance.exports.opa_heap_ptr_set(this.baseHeapPtr);
