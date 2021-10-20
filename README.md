@@ -68,11 +68,20 @@ javascript context through external APIs.
 The loaded policy object returned from `loadPolicy()` has a couple of important
 APIs for policy evaluation:
 
-`setData(obj)` -- Provide an external `data` document for policy evaluation.
-Requires a JSON serializable object. `evaluate(input)` -- Evaluates the policy
-using any loaded data and the supplied `input` document.
+`setData(data)` -- Provide an external `data` document for policy evaluation.
 
-The `input` parameter must be a JSON string.
+- `data` MUST be a serializable object or `ArrayBuffer`, which assumed to be a
+  well-formed stringified JSON
+
+`evaluate(input)` -- Evaluates the policy using any loaded data and the supplied
+`input` document.
+
+- `input` parameter MAY be an `object`, primitive literal or `ArrayBuffer`,
+  which assumed to be a well-formed stringified JSON
+
+> `ArrayBuffer` supported in the APIs above as a performance optimisation
+> feature, given that either network or file system provided contents can easily
+> be represented as `ArrayBuffer` in a very performant way.
 
 Example:
 

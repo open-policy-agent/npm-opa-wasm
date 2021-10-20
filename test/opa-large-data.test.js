@@ -2,6 +2,7 @@ const { EOL } = require("os");
 const { readFileSync } = require("fs");
 const { execFileSync } = require("child_process");
 const { loadPolicy } = require("../src/opa.js");
+const util = require("util");
 
 describe("setData stress tests", () => {
   const baseDataRaw = readFileSync(
@@ -11,10 +12,13 @@ describe("setData stress tests", () => {
   const baseData = JSON.parse(baseDataRaw);
 
   let data;
+  let dataBuf;
 
-  const multiplyFactor = 50000;
-  data = multiplyData(baseData, multiplyFactor);
-  const dataSize = multiplyFactor / 1000;
+  const multiplyFactor = 50;
+  data = multiplyData(baseData, multiplyFactor * 1000);
+  dataBuf = new util.TextEncoder().encode(JSON.stringify(data)).buffer;
+  data = null;
+  const dataSize = dataBuf.byteLength / 1000000;
 
   beforeAll(() => {
     try {
@@ -50,8 +54,8 @@ describe("setData stress tests", () => {
 
     const start = Date.now();
 
-    policy.setData(data);
-    data = null;
+    policy.setData(dataBuf);
+    dataBuf = null;
 
     const end = Date.now();
     console.log(`setData of ~${dataSize}Mb took ${end - start}ms`);

@@ -1,7 +1,5 @@
 package example.one
 
-import input
-
 default myRule = false
 default myOtherRule = false
 

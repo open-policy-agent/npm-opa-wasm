@@ -1,0 +1,16 @@
+{
+  "roles": {
+    "1": {
+      "id": 1,
+      "permissions": [
+        {
+          "id": "view:account-billing"
+        },
+        {
+          "id": "edit:account-billing"
+        }
+      ]
+    }
+  },
+  "secret": "secret"
+}
