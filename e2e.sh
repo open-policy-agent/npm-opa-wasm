@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-npm run types
+npm run build
 
 cd examples/nodejs-ts-app
 
