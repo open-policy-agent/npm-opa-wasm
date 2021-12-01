@@ -42,7 +42,8 @@ describe("stringified data/input support", () => {
     ]);
 
     const policyWasm = readFileSync(`${fixturesFolder}/policy.wasm`);
-    policy = await loadPolicy(policyWasm);
+    const opts = { initial: 5, maximum: 10 };
+    policy = await loadPolicy(policyWasm, opts);
   });
 
   it("should accept stringified data", () => {
