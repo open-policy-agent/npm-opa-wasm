@@ -298,10 +298,15 @@ class LoadedPolicy {
           inputBuf = new util.TextEncoder().encode(inputAsText);
         }
 
+        inputAddr = this.dataHeapPtr;
         inputLen = inputBuf.byteLength;
+        const delta = inputAddr + inputLen - this.mem.buffer.byteLength;
+        if (delta > 0) {
+          const pages = roundup(delta);
+          this.mem.grow(pages);
+        }
         const buf = new Uint8Array(this.mem.buffer);
         buf.set(inputBuf, this.dataHeapPtr);
-        inputAddr = this.dataHeapPtr;
         this.dataHeapPtr = inputAddr + inputLen;
       }
 
@@ -361,6 +366,11 @@ class LoadedPolicy {
   }
 }
 
+function roundup(bytes) {
+  const pageSize = 64 * 1024;
+  return Math.ceil(bytes / pageSize);
+}
+
 module.exports = {
   /**
    * Takes in either an ArrayBuffer or WebAssembly.Module
@@ -371,10 +381,16 @@ module.exports = {
    * as second param.
    * Defaults to 5 pages (320KB).
    * @param {BufferSource | WebAssembly.Module} regoWasm
-   * @param {number} memorySize
+   * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
    */
-  async loadPolicy(regoWasm, memorySize = 5) {
-    const memory = new WebAssembly.Memory({ initial: memorySize });
+  async loadPolicy(regoWasm, memoryDescriptor = {}) {
+    // back-compat, second arg used to be a number: 'memorySize', with default of 5
+    if (typeof memoryDescriptor === "number") {
+      memoryDescriptor = { initial: memoryDescriptor };
+    }
+    memoryDescriptor.initial = memoryDescriptor.initial || 5;
+
+    const memory = new WebAssembly.Memory(memoryDescriptor);
     const { policy, minorVersion } = await _loadPolicy(regoWasm, memory);
     return new LoadedPolicy(policy, memory, minorVersion);
   },
