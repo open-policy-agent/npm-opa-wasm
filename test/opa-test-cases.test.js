@@ -2,7 +2,7 @@ const { readFileSync, readdirSync, writeFileSync } = require("fs");
 const { execFileSync, spawnSync } = require("child_process");
 const { join } = require("path");
 const { loadPolicy } = require("../src/opa.js");
-const yaml = require("js-yaml");
+const yaml = require("yaml");
 const tmp = require("tmp");
 const sort = require("smart-deep-sort");
 
@@ -42,8 +42,7 @@ function compileToWasm(modules, query) {
   if (modules && modules.length < 1) {
     return {
       skip: `empty modules cases are not supported (got ${
-        modules &&
-        modules.length
+        modules && modules.length
       })`,
     };
   }
@@ -95,7 +94,7 @@ if (path === undefined) {
 } else {
   for (const file of walk(path)) {
     describe(file, () => {
-      const doc = yaml.load(readFileSync(file, "utf8"));
+      const doc = yaml.parse(readFileSync(file, "utf8"));
       cases:
       for (const tc of doc.cases) {
         const reason = exceptions[tc.note];
@@ -118,8 +117,7 @@ if (path === undefined) {
         if (tc.want_result && tc.want_result.length > 1) {
           test.todo(
             `${tc.note}: more than one expected result not supported: ${
-              tc
-                .want_result && tc.want_result.length
+              tc.want_result && tc.want_result.length
             }`,
           );
           continue cases;
