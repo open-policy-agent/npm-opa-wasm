@@ -2,7 +2,7 @@ const { readFileSync } = require("fs");
 const { execFileSync } = require("child_process");
 const { loadPolicy } = require("../src/opa.js");
 
-describe("yaml.unmarshal() support", () => {
+describe("yaml support", () => {
   const fixturesFolder = "test/fixtures/yaml-support";
 
   let policy;
@@ -27,6 +27,10 @@ describe("yaml.unmarshal() support", () => {
       "yaml/support/hasReferenceError",
       "-e",
       "yaml/support/hasYAMLWarning",
+      "-e",
+      "yaml/support/canMarshalYAML",
+      "-e",
+      "yaml/support/isValidYAML",
     ]);
 
     execFileSync("tar", [
@@ -74,5 +78,20 @@ describe("yaml.unmarshal() support", () => {
       .toThrow();
     const result = policy.evaluate({}, "yaml/support/hasYAMLWarning");
     expect(result.length).toBe(0);
+  });
+
+  it("should marshal yaml", () => {
+    const result = policy.evaluate(
+      [{ foo: [1, 2, 3] }],
+      "yaml/support/canMarshalYAML",
+    );
+    expect(result.length).toBe(1);
+    expect(result[0]).toMatchObject({ result: [[{ foo: [1, 2, 3] }]] });
+  });
+
+  it("should validate yaml", () => {
+    const result = policy.evaluate({}, "yaml/support/isValidYAML");
+    expect(result.length).toBe(1);
+    expect(result[0]).toMatchObject({ result: true });
   });
 });

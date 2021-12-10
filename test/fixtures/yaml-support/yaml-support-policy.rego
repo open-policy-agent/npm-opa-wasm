@@ -22,8 +22,6 @@ x-amazon-apigateway-policy:
       Resource: '*'
 `
 
-default canParseYaml = false
-
 canParseYAML {
 	resource := yaml.unmarshal(fixture)
 	resource.info.title == "test"
@@ -47,4 +45,15 @@ hasReferenceError {
 hasYAMLWarning {
 	# see: https://github.com/eemeli/yaml/blob/395f892ec9a26b9038c8db388b675c3281ab8cd3/tests/doc/errors.js#L224
 	yaml.unmarshal("%FOO\n---bar\n")
+}
+
+canMarshalYAML[x] {
+	string := yaml.marshal(input)
+	x := yaml.unmarshal(string)
+}
+
+isValidYAML {
+	yaml.is_valid(fixture) == true
+	yaml.is_valid("foo: {") == false
+	yaml.is_valid("{\"foo\": \"bar\"}") == true
 }
