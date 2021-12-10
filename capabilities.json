@@ -2072,6 +2072,48 @@
         "type": "function"
       },
       "relation": true
+    },
+    {
+      "name": "yaml.is_valid",
+      "decl": {
+        "args": [
+          {
+            "type": "string"
+          }
+        ],
+        "result": {
+          "type": "boolean"
+        },
+        "type": "function"
+      }
+    },
+    {
+      "name": "yaml.marshal",
+      "decl": {
+        "args": [
+          {
+            "type": "any"
+          }
+        ],
+        "result": {
+          "type": "string"
+        },
+        "type": "function"
+      }
+    },
+    {
+      "name": "yaml.unmarshal",
+      "decl": {
+        "args": [
+          {
+            "type": "string"
+          }
+        ],
+        "result": {
+          "type": "any"
+        },
+        "type": "function"
+      }
     }
   ],
   "wasm_abi_versions": [
