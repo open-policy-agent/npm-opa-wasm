@@ -192,9 +192,13 @@ async function _loadPolicy(policyWasm, memory) {
     },
   });
 
+  // Note: On Node 10.x this value is a number on Node 12.x and up it is
+  // an object with numberic `value` property.
   const abiVersionGlobal = wasm.instance.exports.opa_wasm_abi_version;
   if (abiVersionGlobal !== undefined) {
-    const abiVersion = abiVersionGlobal.value;
+    const abiVersion = typeof abiVersionGlobal === "number"
+      ? abiVersionGlobal
+      : abiVersionGlobal.value;
     if (abiVersion !== 1) {
       throw `unsupported ABI version ${abiVersion}`;
     }
@@ -206,7 +210,9 @@ async function _loadPolicy(policyWasm, memory) {
     wasm.instance.exports.opa_wasm_abi_minor_version;
   let abiMinorVersion;
   if (abiMinorVersionGlobal !== undefined) {
-    abiMinorVersion = abiMinorVersionGlobal.value;
+    abiMinorVersion = typeof abiMinorVersionGlobal === "number"
+      ? abiMinorVersionGlobal
+      : abiMinorVersionGlobal.value;
   } else {
     console.error("opa_wasm_abi_minor_version undefined");
   }
