@@ -33,13 +33,11 @@ describe("growing memory", () => {
       "test/allow",
     ]);
 
-    execFileSync("tar", [
-      "-xzf",
-      bundlePath,
-      "-C",
-      `${fixturesFolder}/`,
-      "/policy.wasm",
-    ], { stdio: "ignore" });
+    execFileSync(
+      "tar",
+      ["-xzf", bundlePath, "-C", `${fixturesFolder}/`, "/policy.wasm"],
+      { stdio: "ignore" },
+    );
 
     policyWasm = readFileSync(`${fixturesFolder}/policy.wasm`);
   });
@@ -47,8 +45,10 @@ describe("growing memory", () => {
   it("input exceeds memory, host fails to grow it", async () => {
     const policy = await loadPolicy(policyWasm, { initial: 2, maximum: 3 });
     const input = "a".repeat(2 * 65536);
+
+    // Note: In Node 10.x case is different
     expect(() => policy.evaluate(input)).toThrow(
-      "WebAssembly.Memory.grow(): Maximum memory size exceeded",
+      /WebAssembly\.Memory\.grow\(\): Maximum memory size exceeded/i,
     );
   });
 

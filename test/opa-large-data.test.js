@@ -60,8 +60,9 @@ describe("setData stress tests", () => {
     const end = Date.now();
     console.log(`setData of ~${dataSize}Mb took ${end - start}ms`);
 
-    if (globalThis.gc) {
-      globalThis.gc();
+    if (global.gc) {
+      console.log("done");
+      global.gc();
     }
     dumpMemoryUsage(`memory status AFTER setData ~${dataSize}Mb`);
   });
