@@ -2,9 +2,16 @@
   "name": "@open-policy-agent/opa-wasm",
   "version": "1.5.0",
   "description": "Open Policy Agent WebAssembly SDK",
+  "files": [
+    "capabilities.json",
+    "src",
+    "dist",
+    "types"
+  ],
   "main": "src/opa.js",
   "types": "types/opa.d.ts",
   "scripts": {
+    "build:browser": "esbuild src/opa.js --outfile=dist/opa-wasm-browser.esm.js --bundle --sourcemap --minify --format=esm --define:global=window --out-extension:.js=.esm.js",
     "lint": "git ls-files | xargs deno lint",
     "fmt:check": "git ls-files | xargs deno fmt --check",
     "fmt": "git ls-files | xargs deno fmt",
@@ -27,7 +34,9 @@
   },
   "homepage": "https://github.com/open-policy-agent/npm-opa-wasm#readme",
   "devDependencies": {
+    "esbuild": "^0.14.5",
     "jest": "^27.2.4",
+    "puppeteer": "^13.0.0",
     "semver": "^7.3.5",
     "smart-deep-sort": "^1.0.2",
     "tmp": "^0.2.1",
@@ -36,5 +45,10 @@
   "dependencies": {
     "sprintf-js": "^1.1.2",
     "yaml": "^1.10.2"
+  },
+  "browser": {
+    "//": "This ensures that the util module isn't bundled in browsers",
+    "util": false,
+    "src/opa.js": "dist/opa-wasm-browser.esm.js"
   }
 }
