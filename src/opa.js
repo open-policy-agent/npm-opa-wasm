@@ -4,6 +4,15 @@
 const builtIns = require("./builtins/index");
 const util = require("util");
 
+// NOTE: The util shim here exists for Node 10.x and can be removed
+// when dropping support. Browsers and Node >= 11.x use the global.
+const TextEncoder = typeof global.TextEncoder !== "undefined"
+  ? global.TextEncoder
+  : util.TextEncoder;
+const TextDecoder = typeof global.TextDecoder !== "undefined"
+  ? global.TextDecoder
+  : util.TextDecoder;
+
 /**
  * @param {WebAssembly.Memory} mem
  */
@@ -35,7 +44,7 @@ function _loadJSON(wasmInstance, memory, value) {
     valueBuf = new Uint8Array(value);
   } else {
     const valueAsText = JSON.stringify(value);
-    valueBuf = new util.TextEncoder().encode(valueAsText);
+    valueBuf = new TextEncoder().encode(valueAsText);
   }
 
   const valueBufLen = valueBuf.byteLength;
@@ -79,7 +88,7 @@ function _dumpJSONRaw(memory, addr) {
   }
 
   const utf8View = new Uint8Array(memory.buffer, addr, idx - addr);
-  const jsonAsText = new util.TextDecoder().decode(utf8View);
+  const jsonAsText = new TextDecoder().decode(utf8View);
 
   return JSON.parse(jsonAsText);
 }
@@ -301,7 +310,7 @@ class LoadedPolicy {
           inputBuf = new Uint8Array(input);
         } else {
           const inputAsText = JSON.stringify(input);
-          inputBuf = new util.TextEncoder().encode(inputAsText);
+          inputBuf = new TextEncoder().encode(inputAsText);
         }
 
         inputAddr = this.dataHeapPtr;
