@@ -2,6 +2,7 @@
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
 const builtIns = require("./builtins/index");
+const util = require("util");
 
 /**
  * @param {WebAssembly.Memory} mem
@@ -34,7 +35,7 @@ function _loadJSON(wasmInstance, memory, value) {
     valueBuf = new Uint8Array(value);
   } else {
     const valueAsText = JSON.stringify(value);
-    valueBuf = new TextEncoder().encode(valueAsText);
+    valueBuf = new util.TextEncoder().encode(valueAsText);
   }
 
   const valueBufLen = valueBuf.byteLength;
@@ -78,7 +79,7 @@ function _dumpJSONRaw(memory, addr) {
   }
 
   const utf8View = new Uint8Array(memory.buffer, addr, idx - addr);
-  const jsonAsText = new TextDecoder().decode(utf8View);
+  const jsonAsText = new util.TextDecoder().decode(utf8View);
 
   return JSON.parse(jsonAsText);
 }
@@ -300,7 +301,7 @@ class LoadedPolicy {
           inputBuf = new Uint8Array(input);
         } else {
           const inputAsText = JSON.stringify(input);
-          inputBuf = new TextEncoder().encode(inputAsText);
+          inputBuf = new util.TextEncoder().encode(inputAsText);
         }
 
         inputAddr = this.dataHeapPtr;

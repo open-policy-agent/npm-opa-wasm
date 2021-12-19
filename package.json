@@ -36,8 +36,5 @@
   "dependencies": {
     "sprintf-js": "^1.1.2",
     "yaml": "^1.10.2"
-  },
-  "engines": {
-    "node": ">=10.0.0"
   }
 }
