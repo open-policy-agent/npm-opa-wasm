@@ -71,4 +71,7 @@ jobs:
       env:
         OPA_CASES: test/cases/
         OPA_TEST_CASES: testdata
+    - run: |
+        npm run build:browser
+        node ./test/browser.puppeteer.js
     - run: ./e2e.sh
