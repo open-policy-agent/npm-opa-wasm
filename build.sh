@@ -38,4 +38,4 @@ $(npm bin)/tsc ./src/index.mjs \
   --declaration \
   --allowJs \
   --emitDeclarationOnly \
-  --outDir $outdir
+  --outDir $outdir/types

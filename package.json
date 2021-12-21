@@ -3,7 +3,7 @@
   "version": "1.5.0",
   "description": "Open Policy Agent WebAssembly SDK",
   "main": "./src/index.cjs",
-  "types": "./dist/opa.d.ts",
+  "types": "./dist/types/opa.d.ts",
   "exports": {
     "node": {
       "import": "./src/index.mjs",
@@ -29,8 +29,7 @@
     "lint": "git ls-files | xargs deno lint",
     "fmt:check": "git ls-files | xargs deno fmt --check",
     "fmt": "git ls-files | xargs deno fmt",
-    "test": "jest --verbose",
-    "types": "tsc"
+    "test": "jest --verbose"
   },
   "repository": {
     "type": "git",
