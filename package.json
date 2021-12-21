@@ -2,16 +2,30 @@
   "name": "@open-policy-agent/opa-wasm",
   "version": "1.5.0",
   "description": "Open Policy Agent WebAssembly SDK",
+  "main": "./src/index.cjs",
+  "types": "./dist/opa.d.ts",
+  "exports": {
+    "node": {
+      "import": "./src/index.mjs",
+      "require": "./src/index.cjs"
+    },
+    "browser": {
+      "import": "./dist/opa-wasm-browser.esm.js",
+      "require": "./src/index.cjs",
+      "default": "./dist/opa-wasm-browser.js"
+    }
+  },
+  "browser": {
+    "//": "This ensures that the util module isn't bundled in browsers",
+    "util": false
+  },
   "files": [
     "capabilities.json",
     "src",
-    "dist",
-    "types"
+    "dist"
   ],
-  "main": "src/opa.js",
-  "types": "types/opa.d.ts",
   "scripts": {
-    "build:browser": "esbuild src/opa.js --outfile=dist/opa-wasm-browser.esm.js --bundle --sourcemap --minify --format=esm --define:global=window --out-extension:.js=.esm.js",
+    "build": "./build.sh",
     "lint": "git ls-files | xargs deno lint",
     "fmt:check": "git ls-files | xargs deno fmt --check",
     "fmt": "git ls-files | xargs deno fmt",
@@ -45,10 +59,5 @@
   "dependencies": {
     "sprintf-js": "^1.1.2",
     "yaml": "^1.10.2"
-  },
-  "browser": {
-    "//": "This ensures that the util module isn't bundled in browsers",
-    "util": false,
-    "src/opa.js": "dist/opa-wasm-browser.esm.js"
   }
 }
