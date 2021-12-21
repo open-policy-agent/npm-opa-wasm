@@ -148,3 +148,45 @@ the same checks can be invoked using `npm`:
 All of these operate on git-tracked files, so make sure you've committed the
 code you'd like to see checked. Alternatively, you can invoke
 `deno lint my_new_file.js` directly, too.
+
+### Build
+
+The published package provides four different entrypoints for consumption:
+
+1. A CommonJS module for consumption with older versions of Node or those using
+   `require()`:
+   ```js
+   const { loadPolicy } = require("@open-policy-agent/opa-wasm");
+   ```
+1. An ESM module for consumption with newer versions of Node:
+   ```js
+   import { loadPolicy } from "@open-policy-agent/opa-wasm";
+   ```
+1. An ESM module for consumption in modern browsers (this will contain all
+   dependencies already bundled and can be used standalone).
+   ```html
+   <script type="module">
+   import opa from 'https://unpkg.com/@open-policy-agent/opa-wasm@latest/dist/opa-wasm-browser.esm.js';
+   opa.loadPolicy(...);
+   </script>
+   ```
+1. A script for consumption in all browsers (this will export an `opa` global
+   variable).
+   ```js
+   <script src="https://unpkg.com/@open-policy-agent/opa-wasm@latest/dist/opa-wasm-browser.js"></script>
+   <script>
+   opa.loadPolicy(...);
+   </script>
+   ```
+
+The browser builds are generated in the `./build.sh` script and use
+[`esbuild`][esbuild]. All exports are defined in the `exports` field in the
+package.json file. More detials on how these work are described in the
+[Conditional Exports][conditional-exports] documentation.
+
+For TypeScript projects we also generate an opa.d.ts declaration file that will
+give correct typings and is also defined under the `types` field in the
+package.json.
+
+[esbuild]: https://esbuild.github.io/
+[conditional-exports]: https://nodejs.org/api/packages.html#conditional-exports
