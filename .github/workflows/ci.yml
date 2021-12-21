@@ -66,12 +66,9 @@ jobs:
         chmod +x ${{ runner.tool_cache }}/opa/opa &&
         echo "${{ runner.tool_cache }}/opa" >> $GITHUB_PATH
     - run: npm ci
-    - run: npm run types
+    - run: npm run build
     - run: npm test
       env:
         OPA_CASES: test/cases/
         OPA_TEST_CASES: testdata
-    - run: |
-        npm run build:browser
-        node ./test/browser.puppeteer.js
     - run: ./e2e.sh
