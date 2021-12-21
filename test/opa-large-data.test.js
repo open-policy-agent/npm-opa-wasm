@@ -1,8 +1,8 @@
-const { EOL } = require("os");
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
-const { loadPolicy } = require("../src/opa.js");
-const util = require("util");
+import { EOL } from "os";
+import { readFileSync } from "fs";
+import { execFileSync } from "child_process";
+import { loadPolicy } from "../src/opa.js";
+import util from "util";
 
 describe("setData stress tests", () => {
   const baseDataRaw = readFileSync(

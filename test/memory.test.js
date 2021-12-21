@@ -1,7 +1,7 @@
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
-const semver = require("semver");
-const { loadPolicy } = require("../src/opa.js");
+import { readFileSync } from "fs";
+import { execFileSync } from "child_process";
+import semver from "semver";
+import { loadPolicy } from "../src/opa.js";
 
 describe("growing memory", () => {
   const fixturesFolder = "test/fixtures/memory";

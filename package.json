@@ -2,14 +2,24 @@
   "name": "@open-policy-agent/opa-wasm",
   "version": "1.5.0",
   "description": "Open Policy Agent WebAssembly SDK",
-  "main": "src/opa.js",
+  "type": "module",
+  "module": "src/opa.js",
+  "main": "cjs/opa.js",
   "types": "types/opa.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/opa.js",
+      "import": "./src/opa.js"
+    }
+  },
   "scripts": {
     "lint": "git ls-files | xargs deno lint",
     "fmt:check": "git ls-files | xargs deno fmt --check",
     "fmt": "git ls-files | xargs deno fmt",
-    "test": "jest --verbose",
-    "types": "tsc"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --verbose",
+    "types": "tsc --p ./tsconfig-types.json",
+    "build:cjs": "tsc --p ./tsconfig-cjs.json",
+    "build": "npm run types && npm run build:cjs"
   },
   "repository": {
     "type": "git",
@@ -27,6 +37,8 @@
   },
   "homepage": "https://github.com/open-policy-agent/npm-opa-wasm#readme",
   "devDependencies": {
+    "@types/jest": "^27.0.3",
+    "@types/node": "^17.0.2",
     "jest": "^27.2.4",
     "semver": "^7.3.5",
     "smart-deep-sort": "^1.0.2",

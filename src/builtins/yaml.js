@@ -1,4 +1,4 @@
-const yaml = require("yaml");
+import yaml from "yaml";
 
 // see: https://eemeli.org/yaml/v1/#errors
 const errors = new Set([
@@ -29,7 +29,7 @@ function parse(str) {
   }
 }
 
-module.exports = {
+export default {
   // is_valid is expected to return nothing if input is invalid otherwise
   // true/false for it being valid YAML.
   "yaml.is_valid": (str) => typeof str === "string" ? parse(str).ok : undefined,

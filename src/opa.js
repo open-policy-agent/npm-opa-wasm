@@ -1,8 +1,8 @@
 // Copyright 2018 The OPA Authors.  All rights reserved.
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
-const builtIns = require("./builtins/index");
-const util = require("util");
+import builtIns from "./builtins/index.js";
+import { TextDecoder, TextEncoder } from "util";
 
 /**
  * @param {WebAssembly.Memory} mem
@@ -35,7 +35,7 @@ function _loadJSON(wasmInstance, memory, value) {
     valueBuf = new Uint8Array(value);
   } else {
     const valueAsText = JSON.stringify(value);
-    valueBuf = new util.TextEncoder().encode(valueAsText);
+    valueBuf = new TextEncoder().encode(valueAsText);
   }
 
   const valueBufLen = valueBuf.byteLength;
@@ -79,7 +79,7 @@ function _dumpJSONRaw(memory, addr) {
   }
 
   const utf8View = new Uint8Array(memory.buffer, addr, idx - addr);
-  const jsonAsText = new util.TextDecoder().decode(utf8View);
+  const jsonAsText = new TextDecoder().decode(utf8View);
 
   return JSON.parse(jsonAsText);
 }
@@ -301,7 +301,7 @@ class LoadedPolicy {
           inputBuf = new Uint8Array(input);
         } else {
           const inputAsText = JSON.stringify(input);
-          inputBuf = new util.TextEncoder().encode(inputAsText);
+          inputBuf = new TextEncoder().encode(inputAsText);
         }
 
         inputAddr = this.dataHeapPtr;
@@ -377,27 +377,25 @@ function roundup(bytes) {
   return Math.ceil(bytes / pageSize);
 }
 
-module.exports = {
-  /**
-   * Takes in either an ArrayBuffer or WebAssembly.Module
-   * and will return a LoadedPolicy object which can be used to evaluate
-   * the policy.
-   *
-   * To set custom memory size specify number of memory pages
-   * as second param.
-   * Defaults to 5 pages (320KB).
-   * @param {BufferSource | WebAssembly.Module} regoWasm
-   * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
-   */
-  async loadPolicy(regoWasm, memoryDescriptor = {}) {
-    // back-compat, second arg used to be a number: 'memorySize', with default of 5
-    if (typeof memoryDescriptor === "number") {
-      memoryDescriptor = { initial: memoryDescriptor };
-    }
-    memoryDescriptor.initial = memoryDescriptor.initial || 5;
+/**
+ * Takes in either an ArrayBuffer or WebAssembly.Module
+ * and will return a LoadedPolicy object which can be used to evaluate
+ * the policy.
+ *
+ * To set custom memory size specify number of memory pages
+ * as second param.
+ * Defaults to 5 pages (320KB).
+ * @param {BufferSource | WebAssembly.Module} regoWasm
+ * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
+ */
+export async function loadPolicy(regoWasm, memoryDescriptor = {}) {
+  // back-compat, second arg used to be a number: 'memorySize', with default of 5
+  if (typeof memoryDescriptor === "number") {
+    memoryDescriptor = { initial: memoryDescriptor };
+  }
+  memoryDescriptor.initial = memoryDescriptor.initial || 5;
 
-    const memory = new WebAssembly.Memory(memoryDescriptor);
-    const { policy, minorVersion } = await _loadPolicy(regoWasm, memory);
-    return new LoadedPolicy(policy, memory, minorVersion);
-  },
-};
+  const memory = new WebAssembly.Memory(memoryDescriptor);
+  const { policy, minorVersion } = await _loadPolicy(regoWasm, memory);
+  return new LoadedPolicy(policy, memory, minorVersion);
+}

@@ -1,7 +1,7 @@
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
-const { loadPolicy } = require("../src/opa.js");
-const util = require("util");
+import { readFileSync } from "fs";
+import { execFileSync } from "child_process";
+import { loadPolicy } from "../src/opa.js";
+import util from "util";
 
 describe("stringified data/input support", () => {
   const fixturesFolder = "test/fixtures/stringified-support";

@@ -1,10 +1,10 @@
-const { readFileSync, readdirSync, writeFileSync } = require("fs");
-const { execFileSync, spawnSync } = require("child_process");
-const { join } = require("path");
-const { loadPolicy } = require("../src/opa.js");
-const yaml = require("yaml");
-const tmp = require("tmp");
-const sort = require("smart-deep-sort");
+import { readdirSync, readFileSync, writeFileSync } from "fs";
+import { execFileSync, spawnSync } from "child_process";
+import { join } from "path";
+import { loadPolicy } from "../src/opa.js";
+import yaml from "yaml";
+import tmp from "tmp";
+import sort from "smart-deep-sort";
 
 // Known failures
 const exceptions = {
