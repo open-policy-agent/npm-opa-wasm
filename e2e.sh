@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-npm run types
-
 cd examples/nodejs-ts-app
 
 echo "Installing dependencies..."
