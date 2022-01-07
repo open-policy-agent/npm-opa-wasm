@@ -2,7 +2,6 @@ const { readFileSync, readdirSync, writeFileSync } = require("fs");
 const { execFileSync, spawnSync } = require("child_process");
 const { join } = require("path");
 const { loadPolicy } = require("../src/opa.js");
-const yaml = require("yaml");
 const tmp = require("tmp");
 const sort = require("smart-deep-sort");
 
@@ -94,7 +93,22 @@ if (path === undefined) {
 } else {
   for (const file of walk(path)) {
     describe(file, () => {
-      const doc = yaml.parse(readFileSync(file, "utf8"));
+      // the raw yaml often posed problems, have opa give us json
+      const res = spawnSync("opa", [
+        "eval",
+        "--format",
+        "raw",
+        "--input",
+        file,
+        "input",
+      ]);
+      if (res.error || res.status != 0) {
+        test.todo(
+          `${file} can't convert to JSON: ${res.stdout} (status ${res.status})`,
+        );
+        return;
+      }
+      const doc = JSON.parse(res.stdout);
       cases:
       for (const tc of doc.cases) {
         const reason = exceptions[tc.note];
