@@ -1,1 +1,1 @@
-module.exports = require('./opa');
+module.exports = require("./opa");
