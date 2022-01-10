@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: denoland/setup-deno@v1
       with:
-        deno-version: v1.15.0
+        deno-version: v1.17.2
     - uses: actions/checkout@v2
     - run: deno fmt --check
     - run: deno lint
@@ -71,4 +71,30 @@ jobs:
       env:
         OPA_CASES: test/cases/
         OPA_TEST_CASES: testdata
-    - run: ./e2e.sh
+
+  examples-node:
+    name: NodeJS examples
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: infracost/setup-opa@v1
+    - uses: actions/setup-node@v2.5.1
+      with:
+        node-version: "12"
+    - name: nodejs
+      run: >
+        npm ci
+        npm run build
+        ./e2e.sh
+
+  examples-deno:
+    name: Deno examples
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: infracost/setup-opa@v1
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.17.2
+    - run: make
+      working-directory: examples/deno
