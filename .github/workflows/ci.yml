@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: infracost/setup-opa@v1
+    - uses: open-policy-agent/setup-opa@v1
     - uses: actions/setup-node@v2.5.1
       with:
         node-version: "12"
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: infracost/setup-opa@v1
+    - uses: open-policy-agent/setup-opa@v1
     - uses: denoland/setup-deno@v1
       with:
         deno-version: v1.17.2
