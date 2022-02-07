@@ -25,7 +25,7 @@ jobs:
         node-version: [10.x, 12.x, 14.x]
         opa-version:
         - 0.30.2 # last version with ABI 1.1, 0.31.0+ has ABI 1.2
-        - 0.36.0 # 0.35.0 is the first release with https://github.com/open-policy-agent/opa/pull/4055
+        - 0.37.1 # 0.35.0 is the first release with https://github.com/open-policy-agent/opa/pull/4055
 
     steps:
     - uses: actions/checkout@v2
