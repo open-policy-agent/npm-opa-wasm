@@ -322,8 +322,10 @@ class LoadedPolicy {
         }
         const buf = new Uint8Array(this.mem.buffer);
         buf.set(inputBuf, this.dataHeapPtr);
-        this.dataHeapPtr = inputAddr + inputLen;
       }
+
+      // opa_eval will update the Instance heap pointer to the value below
+      const heapPtr = this.dataHeapPtr + inputLen;
 
       const ret = this.wasmInstance.exports.opa_eval(
         0,
@@ -331,7 +333,7 @@ class LoadedPolicy {
         this.dataAddr,
         inputAddr,
         inputLen,
-        this.dataHeapPtr,
+        heapPtr,
         0,
       );
       return _dumpJSONRaw(this.mem, ret);
