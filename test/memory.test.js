@@ -63,4 +63,13 @@ describe("growing memory", () => {
     const input = "a".repeat(2 * 65536);
     expect(() => policy.evaluate(input)).not.toThrow();
   });
+
+  it("does not leak memory evaluating the same policy multiple times", async () => {
+    const policy = await loadPolicy(policyWasm, { initial: 2, maximum: 8 });
+    const input = "a".repeat(2 * 65536);
+
+    for (const _ of new Array(16)) {
+      expect(() => policy.evaluate(input)).not.toThrow();
+    }
+  });
 });
