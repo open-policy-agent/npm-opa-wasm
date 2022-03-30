@@ -101,11 +101,18 @@ const builtinFuncs = builtIns;
  * @param {WebAssembly.Instance} wasmInstance
  * @param {WebAssembly.Memory} memory
  * @param {{ [builtinId: number]: string }} builtins
+ * @param {{ [builtinName: string]: Function }} customBuiltins
  * @param {string} builtin_id
  */
-function _builtinCall(wasmInstance, memory, builtins, builtinId) {
+function _builtinCall(
+  wasmInstance,
+  memory,
+  builtins,
+  customBuiltins,
+  builtinId,
+) {
   const builtInName = builtins[builtinId];
-  const impl = builtinFuncs[builtInName];
+  const impl = builtinFuncs[builtInName] || customBuiltins[builtInName];
 
   if (impl === undefined) {
     throw {
@@ -119,7 +126,7 @@ function _builtinCall(wasmInstance, memory, builtins, builtinId) {
   const argArray = Array.prototype.slice.apply(arguments);
   const args = [];
 
-  for (let i = 4; i < argArray.length; i++) {
+  for (let i = 5; i < argArray.length; i++) {
     const jsArg = _dumpJSON(wasmInstance, memory, argArray[i]);
     args.push(jsArg);
   }
@@ -131,15 +138,18 @@ function _builtinCall(wasmInstance, memory, builtins, builtinId) {
 
 /**
  * _loadPolicy can take in either an ArrayBuffer or WebAssembly.Module
- * as its first argument, and a WebAssembly.Memory for the second parameter.
+ * as its first argument, a WebAssembly.Memory for the second parameter,
+ * and an object mapping string names to additional builtin functions for
+ * the third parameter.
  * It will return a Promise, depending on the input type the promise
  * resolves to both a compiled WebAssembly.Module and its first WebAssembly.Instance
  * or to the WebAssemblyInstance.
  * @param {BufferSource | WebAssembly.Module} policyWasm
  * @param {WebAssembly.Memory} memory
+ * @param {{ [builtinName: string]: Function }} customBuiltins
  * @returns {Promise<{ policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }>}
  */
-async function _loadPolicy(policyWasm, memory) {
+async function _loadPolicy(policyWasm, memory, customBuiltins) {
   const addr2string = stringDecoder(memory);
 
   const env = {};
@@ -154,13 +164,20 @@ async function _loadPolicy(policyWasm, memory) {
         console.log(addr2string(addr));
       },
       opa_builtin0: function (builtinId, _ctx) {
-        return _builtinCall(env.instance, memory, env.builtins, builtinId);
+        return _builtinCall(
+          env.instance,
+          memory,
+          env.builtins,
+          customBuiltins,
+          builtinId,
+        );
       },
       opa_builtin1: function (builtinId, _ctx, arg1) {
         return _builtinCall(
           env.instance,
           memory,
           env.builtins,
+          customBuiltins,
           builtinId,
           arg1,
         );
@@ -170,6 +187,7 @@ async function _loadPolicy(policyWasm, memory) {
           env.instance,
           memory,
           env.builtins,
+          customBuiltins,
           builtinId,
           arg1,
           arg2,
@@ -180,6 +198,7 @@ async function _loadPolicy(policyWasm, memory) {
           env.instance,
           memory,
           env.builtins,
+          customBuiltins,
           builtinId,
           arg1,
           arg2,
@@ -191,6 +210,7 @@ async function _loadPolicy(policyWasm, memory) {
           env.instance,
           memory,
           env.builtins,
+          customBuiltins,
           builtinId,
           arg1,
           arg2,
@@ -399,8 +419,9 @@ module.exports = {
    * Defaults to 5 pages (320KB).
    * @param {BufferSource | WebAssembly.Module} regoWasm
    * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
+   * @param {{ [builtinName: string]: Function }} customBuiltins A map from string names to builtin functions
    */
-  async loadPolicy(regoWasm, memoryDescriptor = {}) {
+  async loadPolicy(regoWasm, memoryDescriptor = {}, customBuiltins = {}) {
     // back-compat, second arg used to be a number: 'memorySize', with default of 5
     if (typeof memoryDescriptor === "number") {
       memoryDescriptor = { initial: memoryDescriptor };
@@ -408,7 +429,11 @@ module.exports = {
     memoryDescriptor.initial = memoryDescriptor.initial || 5;
 
     const memory = new WebAssembly.Memory(memoryDescriptor);
-    const { policy, minorVersion } = await _loadPolicy(regoWasm, memory);
+    const { policy, minorVersion } = await _loadPolicy(
+      regoWasm,
+      memory,
+      customBuiltins,
+    );
     return new LoadedPolicy(policy, memory, minorVersion);
   },
 };
