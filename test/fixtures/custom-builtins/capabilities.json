@@ -1,0 +1,98 @@
+{
+  "builtins": [
+    {
+      "name": "custom.zeroArgBuiltin",
+      "decl": {
+        "type": "function",
+        "args": [],
+        "result": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "custom.oneArgBuiltin",
+      "decl": {
+        "type": "function",
+        "args": [
+          { "type": "string" }
+        ],
+        "result": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "custom.twoArgBuiltin",
+      "decl": {
+        "type": "function",
+        "args": [
+          { "type": "string" },
+          { "type": "string" }
+        ],
+        "result": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "custom.threeArgBuiltin",
+      "decl": {
+        "type": "function",
+        "args": [
+          { "type": "string" },
+          { "type": "string" },
+          { "type": "string" }
+        ],
+        "result": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "custom.fourArgBuiltin",
+      "decl": {
+        "type": "function",
+        "args": [
+          { "type": "string" },
+          { "type": "string" },
+          { "type": "string" },
+          { "type": "string" }
+        ],
+        "result": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "json.is_valid",
+      "decl": {
+        "type": "function",
+        "args": [
+          { "type": "string" }
+        ],
+        "result": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "eq",
+      "decl": {
+        "args": [
+          {
+            "type": "any"
+          },
+          {
+            "type": "any"
+          }
+        ],
+        "result": {
+          "type": "boolean"
+        },
+        "type": "function"
+      },
+      "infix": "="
+    }
+  ]
+}
