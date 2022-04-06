@@ -20,11 +20,12 @@ There is an example policy included with the example, see
 npm run build
 ```
 
-Note to Windows users using a PowerShell terminal: the way that PowerShell 
+## Note to Windows users using a PowerShell terminal 
+The way that PowerShell 
 escapes characters is different from Bash. See 
 [this](https://github.com/open-policy-agent/opa/issues/3953) for more 
-information. In order to run this example in Windows, use double quotes 
-when using the opa comand to build:
+information. In order to run this example in Windows, use double 
+quotes when using the opa comand to build:
 
 ```
 opa build -t wasm -e "example/hello" ./example.rego && tar xzf ./bundle.tar.gz /policy.wasm
