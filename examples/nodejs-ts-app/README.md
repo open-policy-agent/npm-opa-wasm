@@ -21,6 +21,7 @@ npm run build
 ```
 
 ## Note to Windows users using a PowerShell terminal 
+
 The way that PowerShell 
 escapes characters is different from Bash. See 
 [this](https://github.com/open-policy-agent/opa/issues/3953) for more 
