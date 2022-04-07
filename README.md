@@ -121,7 +121,7 @@ or `opa build` CLI tool.
 For example, with OPA v0.20.5+:
 
 ```bash
-opa build -t wasm -e 'example/allow' example.rego
+opa build -t wasm -e example/allow example.rego
 ```
 
 Which is compiling the `example.rego` policy file with the result set to
