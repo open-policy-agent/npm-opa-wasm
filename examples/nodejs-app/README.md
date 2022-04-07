@@ -23,7 +23,7 @@ There is an example policy included with the example, see
 [example.rego](./example.rego)
 
 ```bash
-opa build -t wasm -e 'example/hello' ./example.rego
+opa build -t wasm -e example/hello ./example.rego
 tar -xzf ./bundle.tar.gz /policy.wasm
 ```
 
