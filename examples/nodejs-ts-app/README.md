@@ -23,9 +23,9 @@ npm run build
 ## Run the example Node JS code that invokes the Wasm binary:
 
 ```bash
-npm run -- '{\"message\": \"world\"}'
+npm start -- '{\"message\": \"world\"}'
 ```
 
 ```bash
-npm run -- '{\"message\": \"not-world\"}'
+npm start -- '{\"message\": \"not-world\"}'
 ```
