@@ -5,19 +5,8 @@
   "main": "./src/index.cjs",
   "types": "./dist/types/opa.d.ts",
   "exports": {
-    "node": {
-      "import": "./src/index.mjs",
-      "require": "./src/index.cjs"
-    },
-    "browser": {
-      "import": "./dist/opa-wasm-browser.esm.js",
-      "require": "./src/index.cjs",
-      "default": "./dist/opa-wasm-browser.js"
-    }
-  },
-  "browser": {
-    "//": "This ensures that the util module isn't bundled in browsers",
-    "util": false
+    "import": "./src/index.mjs",
+    "require": "./src/index.cjs"
   },
   "files": [
     "capabilities.json",
