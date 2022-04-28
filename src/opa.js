@@ -2,15 +2,17 @@
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
 const builtIns = require("./builtins/index");
-const util = require("util");
+const util = typeof globalThis.TextEncoder === "undefined"
+  ? require("util")
+  : null;
 
 // NOTE: The util shim here exists for Node 10.x and can be removed
 // when dropping support. Browsers and Node >= 11.x use the global.
-const TextEncoder = typeof global.TextEncoder !== "undefined"
-  ? global.TextEncoder
+const TextEncoder = typeof globalThis.TextEncoder !== "undefined"
+  ? globalThis.TextEncoder
   : util.TextEncoder;
-const TextDecoder = typeof global.TextDecoder !== "undefined"
-  ? global.TextDecoder
+const TextDecoder = typeof globalThis.TextDecoder !== "undefined"
+  ? globalThis.TextDecoder
   : util.TextDecoder;
 
 /**
