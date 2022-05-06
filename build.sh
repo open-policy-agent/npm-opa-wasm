@@ -21,7 +21,8 @@ $(npm bin)/esbuild $entrypoint \
   --format=iife \
   --platform=browser \
   --define:global=window \
-  --global-name=opa
+  --global-name=opa \
+  --external:util
 
 echo "Generating esm browser build…"
 $(npm bin)/esbuild $entrypoint \
@@ -31,7 +32,8 @@ $(npm bin)/esbuild $entrypoint \
   --minify \
   --format=esm \
   --platform=browser \
-  --define:global=window
+  --define:global=window \
+  --external:util
 
 echo "Generating TypeScript declaration file…"
 $(npm bin)/tsc ./src/index.mjs \
