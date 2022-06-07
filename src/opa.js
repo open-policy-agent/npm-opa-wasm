@@ -227,8 +227,7 @@ async function _loadPolicy(policyWasm, memory, customBuiltins) {
     console.error("opa_wasm_abi_version undefined"); // logs to stderr
   }
 
-  const abiMinorVersionGlobal =
-  wasmInstance.exports.opa_wasm_abi_minor_version;
+  const abiMinorVersionGlobal = wasmInstance.exports.opa_wasm_abi_minor_version;
   let abiMinorVersion;
   if (abiMinorVersionGlobal !== undefined) {
     abiMinorVersion = typeof abiMinorVersionGlobal === "number"
