@@ -211,9 +211,11 @@ async function _loadPolicy(policyWasm, memory, customBuiltins) {
     },
   });
 
+  env.instance = wasm.instance ? wasm.instance : wasm;
+
   // Note: On Node 10.x this value is a number on Node 12.x and up it is
   // an object with numberic `value` property.
-  const abiVersionGlobal = wasm.instance.exports.opa_wasm_abi_version;
+  const abiVersionGlobal = env.instance.exports.opa_wasm_abi_version;
   if (abiVersionGlobal !== undefined) {
     const abiVersion = typeof abiVersionGlobal === "number"
       ? abiVersionGlobal
@@ -225,8 +227,7 @@ async function _loadPolicy(policyWasm, memory, customBuiltins) {
     console.error("opa_wasm_abi_version undefined"); // logs to stderr
   }
 
-  const abiMinorVersionGlobal =
-    wasm.instance.exports.opa_wasm_abi_minor_version;
+  const abiMinorVersionGlobal = env.instance.exports.opa_wasm_abi_minor_version;
   let abiMinorVersion;
   if (abiMinorVersionGlobal !== undefined) {
     abiMinorVersion = typeof abiMinorVersionGlobal === "number"
@@ -235,8 +236,6 @@ async function _loadPolicy(policyWasm, memory, customBuiltins) {
   } else {
     console.error("opa_wasm_abi_minor_version undefined");
   }
-
-  env.instance = wasm.instance ? wasm.instance : wasm;
 
   const builtins = _dumpJSON(
     env.instance,
