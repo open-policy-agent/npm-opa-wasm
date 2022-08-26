@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [12.x, 14.x, 16.x, 18.x]
+        node-version: [14.x, 16.x, 18.x]
         opa-version:
         - 0.30.2 # last version with ABI 1.1, 0.31.0+ has ABI 1.2
         - 0.41.0 # 0.35.0 is the first release with https://github.com/open-policy-agent/opa/pull/4055
