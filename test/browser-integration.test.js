@@ -64,6 +64,22 @@ test("default script should expose working opa global", async () => {
   ]);
 });
 
+test("loadPolicySync can be used inside a worker thread", async () => {
+  const result = await page.evaluate(function () {
+    return new Promise((resolve, _) => {
+      const worker = new Worker("/test/fixtures/load-policy-sync-worker.js");
+      worker.onmessage = function (e) {
+        resolve(e.data);
+      };
+    });
+  });
+  expect(result).toEqual([
+    {
+      result: { myOtherRule: false, myRule: false },
+    },
+  ]);
+});
+
 async function startStaticServer() {
   // Basic webserver to serve the test suite relative to the root.
   const server = http.createServer(function (req, res) {
