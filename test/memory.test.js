@@ -1,7 +1,7 @@
 const { readFileSync } = require("fs");
 const { execFileSync } = require("child_process");
 const semver = require("semver");
-const { loadPolicy } = require("../src/opa.js");
+const { loadPolicy, loadPolicySync } = require("../src/opa.js");
 
 describe("growing memory", () => {
   const fixturesFolder = "test/fixtures/memory";
@@ -71,5 +71,11 @@ describe("growing memory", () => {
     for (const _ of new Array(16)) {
       expect(() => policy.evaluate(input)).not.toThrow();
     }
+  });
+
+  it("large input, host and guest grow successfully (synchronous load)", () => {
+    const policy = loadPolicySync(policyWasm, { initial: 2, maximum: 8 });
+    const input = "a".repeat(2 * 65536);
+    expect(() => policy.evaluate(input)).not.toThrow();
   });
 });

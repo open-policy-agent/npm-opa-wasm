@@ -127,24 +127,16 @@ function _builtinCall(
 }
 
 /**
- * _loadPolicy can take in either an ArrayBuffer or WebAssembly.Module
- * as its first argument, a WebAssembly.Memory for the second parameter,
- * and an object mapping string names to additional builtin functions for
- * the third parameter.
- * It will return a Promise, depending on the input type the promise
- * resolves to both a compiled WebAssembly.Module and its first WebAssembly.Instance
- * or to the WebAssemblyInstance.
- * @param {BufferSource | WebAssembly.Module} policyWasm
+ * _importObject builds the WebAssembly.Imports
+ * @param {Object} env
  * @param {WebAssembly.Memory} memory
  * @param {{ [builtinName: string]: Function }} customBuiltins
- * @returns {Promise<{ policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }>}
+ * @returns {WebAssembly.Imports}
  */
-async function _loadPolicy(policyWasm, memory, customBuiltins) {
+function _importObject(env, memory, customBuiltins) {
   const addr2string = stringDecoder(memory);
 
-  const env = {};
-
-  const wasm = await WebAssembly.instantiate(policyWasm, {
+  return {
     env: {
       memory,
       opa_abort: function (addr) {
@@ -209,8 +201,17 @@ async function _loadPolicy(policyWasm, memory, customBuiltins) {
         );
       },
     },
-  });
+  };
+}
 
+/**
+ * _preparePolicy checks the ABI version and loads the built-in functions
+ * @param {Object} env
+ * @param {WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance} wasm
+ * @param {WebAssembly.Memory} memory
+ * @returns { policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }}
+ */
+function _preparePolicy(env, wasm, memory) {
   env.instance = wasm.instance ? wasm.instance : wasm;
 
   // Note: On Node 10.x this value is a number on Node 12.x and up it is
@@ -251,6 +252,59 @@ async function _loadPolicy(policyWasm, memory, customBuiltins) {
   }
 
   return { policy: wasm, minorVersion: abiMinorVersion };
+}
+
+/**
+ * _loadPolicy can take in either an ArrayBuffer or WebAssembly.Module
+ * as its first argument, a WebAssembly.Memory for the second parameter,
+ * and an object mapping string names to additional builtin functions for
+ * the third parameter.
+ * It will return a Promise, depending on the input type the promise
+ * resolves to both a compiled WebAssembly.Module and its first WebAssembly.Instance
+ * or to the WebAssemblyInstance.
+ * @param {BufferSource | WebAssembly.Module} policyWasm
+ * @param {WebAssembly.Memory} memory
+ * @param {{ [builtinName: string]: Function }} customBuiltins
+ * @returns {Promise<{ policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }>}
+ */
+async function _loadPolicy(policyWasm, memory, customBuiltins) {
+  const env = {};
+
+  const wasm = await WebAssembly.instantiate(
+    policyWasm,
+    _importObject(env, memory, customBuiltins),
+  );
+
+  return _preparePolicy(env, wasm, memory);
+}
+
+/**
+ * _loadPolicySync can take in either an ArrayBuffer or WebAssembly.Module
+ * as its first argument, a WebAssembly.Memory for the second parameter,
+ * and an object mapping string names to additional builtin functions for
+ * the third parameter.
+ * It will return a compiled WebAssembly.Module and its first WebAssembly.Instance.
+ * @param {BufferSource | WebAssembly.Module} policyWasm
+ * @param {WebAssembly.Memory} memory
+ * @param {{ [builtinName: string]: Function }} customBuiltins
+ * @returns {Promise<{ policy: WebAssembly.Instance, minorVersion: number }>}
+ */
+function _loadPolicySync(policyWasm, memory, customBuiltins) {
+  const env = {};
+
+  if (
+    policyWasm instanceof ArrayBuffer ||
+    policyWasm.buffer instanceof ArrayBuffer
+  ) {
+    policyWasm = new WebAssembly.Module(policyWasm);
+  }
+
+  const wasm = new WebAssembly.Instance(
+    policyWasm,
+    _importObject(env, memory, customBuiltins),
+  );
+
+  return _preparePolicy(env, wasm, memory);
 }
 
 /**
@@ -400,8 +454,8 @@ function roundup(bytes) {
 module.exports = {
   /**
    * Takes in either an ArrayBuffer or WebAssembly.Module
-   * and will return a LoadedPolicy object which can be used to evaluate
-   * the policy.
+   * and will return a Promise of a LoadedPolicy object which
+   * can be used to evaluate the policy.
    *
    * To set custom memory size specify number of memory pages
    * as second param.
@@ -409,6 +463,7 @@ module.exports = {
    * @param {BufferSource | WebAssembly.Module} regoWasm
    * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
    * @param {{ [builtinName: string]: Function }} customBuiltins A map from string names to builtin functions
+   * @returns {Promise<LoadedPolicy>}
    */
   async loadPolicy(regoWasm, memoryDescriptor = {}, customBuiltins = {}) {
     // back-compat, second arg used to be a number: 'memorySize', with default of 5
@@ -419,6 +474,39 @@ module.exports = {
 
     const memory = new WebAssembly.Memory(memoryDescriptor);
     const { policy, minorVersion } = await _loadPolicy(
+      regoWasm,
+      memory,
+      customBuiltins,
+    );
+    return new LoadedPolicy(policy, memory, minorVersion);
+  },
+
+  /**
+   * Takes in either an ArrayBuffer or WebAssembly.Module
+   * and will return a LoadedPolicy object which can be
+   * used to evaluate the policy.
+   *
+   * This cannot be used from the main thread in a browser.
+   * You must use the `loadPolicy` function instead, or call
+   * from a worker thread.
+   *
+   * To set custom memory size specify number of memory pages
+   * as second param.
+   * Defaults to 5 pages (320KB).
+   * @param {BufferSource | WebAssembly.Module} regoWasm
+   * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
+   * @param {{ [builtinName: string]: Function }} customBuiltins A map from string names to builtin functions
+   * @returns {LoadedPolicy}
+   */
+  loadPolicySync(regoWasm, memoryDescriptor = {}, customBuiltins = {}) {
+    // back-compat, second arg used to be a number: 'memorySize', with default of 5
+    if (typeof memoryDescriptor === "number") {
+      memoryDescriptor = { initial: memoryDescriptor };
+    }
+    memoryDescriptor.initial = memoryDescriptor.initial || 5;
+
+    const memory = new WebAssembly.Memory(memoryDescriptor);
+    const { policy, minorVersion } = _loadPolicySync(
       regoWasm,
       memory,
       customBuiltins,
