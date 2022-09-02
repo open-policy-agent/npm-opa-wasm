@@ -1,6 +1,6 @@
 {
   "name": "@open-policy-agent/opa-wasm",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Open Policy Agent WebAssembly SDK",
   "main": "./src/index.cjs",
   "types": "./dist/types/opa.d.ts",
