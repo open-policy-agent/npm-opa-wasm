@@ -38,7 +38,7 @@
   "devDependencies": {
     "esbuild": "^0.15.3",
     "jest": "^29.0.0",
-    "puppeteer": "^17.0.0",
+    "puppeteer": "^18.0.5",
     "semver": "^7.3.5",
     "smart-deep-sort": "^1.0.2",
     "tmp": "^0.2.1",
