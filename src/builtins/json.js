@@ -1,6 +1,6 @@
 function isValidJSON(str) {
   if (typeof str !== "string") {
-    return;
+    return false;
   }
   try {
     JSON.parse(str);

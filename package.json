@@ -18,7 +18,7 @@
     "lint": "git ls-files | xargs deno lint",
     "fmt:check": "git ls-files | xargs deno fmt --check",
     "fmt": "git ls-files | xargs deno fmt",
-    "test": "jest --verbose"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
