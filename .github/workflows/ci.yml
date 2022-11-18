@@ -66,7 +66,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Install Open Policy Agent ${{ matrix.opa-version }}
-      uses: open-policy-agent/setup-opa@v1
+      uses: open-policy-agent/setup-opa@v2
       with:
         version: v${{ matrix.opa-version }}
     - run: npm ci
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: open-policy-agent/setup-opa@v1
+    - uses: open-policy-agent/setup-opa@v2
     - uses: actions/setup-node@v3
       with:
         node-version: "12"
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: open-policy-agent/setup-opa@v1
+    - uses: open-policy-agent/setup-opa@v2
     - uses: denoland/setup-deno@v1
       with:
         deno-version: v1.17.2
