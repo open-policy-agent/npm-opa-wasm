@@ -92,11 +92,11 @@ loadPolicy(policyWasm).then((policy) => {
   resultSet = policy.evaluate(input);
   if (resultSet == null) {
     console.error("evaluation error");
-  }
-  if (resultSet.length == 0) {
+  } else if (resultSet.length == 0) {
     console.log("undefined");
+  } else {
+    console.log("allowed = " + resultSet[0].result);
   }
-  console.log("allowed = " + allowed[0].result);
 }).catch((error) => {
   console.error("Failed to load policy: ", error);
 });
