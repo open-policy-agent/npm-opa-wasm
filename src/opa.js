@@ -513,4 +513,5 @@ module.exports = {
     );
     return new LoadedPolicy(policy, memory, minorVersion);
   },
+  LoadedPolicy
 };
