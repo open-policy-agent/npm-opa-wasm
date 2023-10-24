@@ -3,11 +3,11 @@
 // license that can be found in the LICENSE file.
 
 import { promises as fs } from "fs";
-import { loadPolicy } from "@open-policy-agent/opa-wasm";
+import { loadPolicy, LoadedPolicy } from "@open-policy-agent/opa-wasm";
 
 (async function readPolicy() {
   const policyWasm = await fs.readFile("policy.wasm");
-  const policy = await loadPolicy(policyWasm);
+  const policy: LoadedPolicy = await loadPolicy(policyWasm);
 
   // Use console parameters for the input, do quick
   // validation by json parsing. Not efficient.. but
