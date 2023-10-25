@@ -13,7 +13,7 @@ if [[ ! -x $(npm bin)/esbuild || ! -x $(npm bin)/tsc ]]; then
 fi
 
 echo "Generating default browser build…"
-$(npm bin)/esbuild $entrypoint \
+npx esbuild $entrypoint \
   --outfile=$outdir/$package-browser.js \
   --bundle \
   --sourcemap \
@@ -25,7 +25,7 @@ $(npm bin)/esbuild $entrypoint \
   --external:util
 
 echo "Generating esm browser build…"
-$(npm bin)/esbuild $entrypoint \
+npx esbuild $entrypoint \
   --outfile=$outdir/$package-browser.esm.js \
   --bundle \
   --sourcemap \
@@ -36,7 +36,7 @@ $(npm bin)/esbuild $entrypoint \
   --external:util
 
 echo "Generating TypeScript declaration file…"
-$(npm bin)/tsc ./src/index.mjs \
+npx tsc ./src/index.mjs \
   --declaration \
   --allowJs \
   --emitDeclarationOnly \
