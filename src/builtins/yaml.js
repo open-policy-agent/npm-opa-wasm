@@ -30,9 +30,8 @@ function parse(str) {
 }
 
 module.exports = {
-  // is_valid is expected to return nothing if input is invalid otherwise
-  // true/false for it being valid YAML.
-  "yaml.is_valid": (str) => typeof str === "string" ? parse(str).ok : undefined,
+  // is_valid is expected to return false if input is invalid; and true/false for it being valid YAML.
+  "yaml.is_valid": (str) => typeof str === "string" && parse(str).ok,
   "yaml.marshal": (data) => yaml.stringify(data),
   "yaml.unmarshal": (str) => parse(str).result,
 };
