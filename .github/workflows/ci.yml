@@ -19,7 +19,7 @@ jobs:
     - uses: denoland/setup-deno@v1
       with:
         deno-version: v1.17.2
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - run: deno fmt --check
     - run: deno lint
 
@@ -34,10 +34,10 @@ jobs:
         - 0.41.0 # 0.35.0 is the first release with https://github.com/open-policy-agent/opa/pull/4055
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Checkout OPA v${{ matrix.opa-version }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: open-policy-agent/opa
         ref: v${{ matrix.opa-version }}
@@ -80,7 +80,7 @@ jobs:
     name: NodeJS examples
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: open-policy-agent/setup-opa@v2
     - uses: actions/setup-node@v3
       with:
@@ -95,7 +95,7 @@ jobs:
     name: Deno examples
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: open-policy-agent/setup-opa@v2
     - uses: denoland/setup-deno@v1
       with:
