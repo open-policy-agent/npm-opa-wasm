@@ -61,7 +61,7 @@ jobs:
         rm -rf opa/
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -82,7 +82,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: open-policy-agent/setup-opa@v2
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
         node-version: "12"
     - name: nodejs
