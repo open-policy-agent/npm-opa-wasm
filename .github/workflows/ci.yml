@@ -84,7 +84,7 @@ jobs:
     - uses: open-policy-agent/setup-opa@v2
     - uses: actions/setup-node@v4
       with:
-        node-version: "12"
+        node-version: "20.x"
     - name: nodejs
       run: >
         npm ci
@@ -99,6 +99,6 @@ jobs:
     - uses: open-policy-agent/setup-opa@v2
     - uses: denoland/setup-deno@v1
       with:
-        deno-version: v1.17.2
+        deno-version: v1.39.2
     - run: make
       working-directory: examples/deno
