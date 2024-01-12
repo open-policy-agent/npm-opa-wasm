@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: denoland/setup-deno@v1
       with:
-        deno-version: v1.17.2
+        deno-version: v1.39.2
     - uses: actions/checkout@v4
     - run: deno fmt --check
     - run: deno lint
