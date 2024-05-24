@@ -5,8 +5,14 @@
   "main": "./src/index.cjs",
   "types": "./dist/types/opa.d.ts",
   "exports": {
-    "import": "./src/index.mjs",
-    "require": "./src/index.cjs"
+    ".": {
+      "types": {
+        "import": "./dist/types/opa.d.ts",
+        "require": "./dist/types/opa.d.ts"
+      },
+      "import": "./src/index.mjs",
+      "require": "./src/index.cjs"
+    }
   },
   "files": [
     "capabilities.json",
