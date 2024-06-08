@@ -270,13 +270,15 @@ function _preparePolicy(env, wasm, memory) {
 async function _loadPolicy(policyWasm, memory, customBuiltins) {
   const env = {};
 
-  const isStreaming = policyWasm instanceof Response || policyWasm instanceof Promise;
+  const isStreaming = policyWasm instanceof Response ||
+    policyWasm instanceof Promise;
 
   const importObject = _importObject(env, memory, customBuiltins);
 
-  const wasm = await (isStreaming
-    ? WebAssembly.instantiateStreaming(policyWasm, importObject)
-    : WebAssembly.instantiate(policyWasm, importObject));
+  const wasm =
+    await (isStreaming
+      ? WebAssembly.instantiateStreaming(policyWasm, importObject)
+      : WebAssembly.instantiate(policyWasm, importObject));
 
   return _preparePolicy(env, wasm, memory);
 }

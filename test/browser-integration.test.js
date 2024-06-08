@@ -45,7 +45,9 @@ test("loadPolicy should allow for a response object that resolves to a fetched w
   const result = await page.evaluate(async function () {
     // NOTE: Paths are evaluated relative to the project root.
     const { default: opa } = await import("/dist/opa-wasm-browser.esm.js");
-    const policy = await opa.loadPolicy(fetch("/test/fixtures/multiple-entrypoints/policy.wasm"));
+    const policy = await opa.loadPolicy(
+      fetch("/test/fixtures/multiple-entrypoints/policy.wasm"),
+    );
     return policy.evaluate({}, "example/one");
   });
   expect(result).toEqual([
