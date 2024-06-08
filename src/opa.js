@@ -262,7 +262,7 @@ function _preparePolicy(env, wasm, memory) {
  * It will return a Promise, depending on the input type the promise
  * resolves to both a compiled WebAssembly.Module and its first WebAssembly.Instance
  * or to the WebAssemblyInstance.
- * @param {BufferSource | WebAssembly.Module | Response | PromiseLike<Response>} policyWasm
+ * @param {BufferSource | WebAssembly.Module | Response | Promise<Response>} policyWasm
  * @param {WebAssembly.Memory} memory
  * @param {{ [builtinName: string]: Function }} customBuiltins
  * @returns {Promise<{ policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }>}
@@ -270,12 +270,7 @@ function _preparePolicy(env, wasm, memory) {
 async function _loadPolicy(policyWasm, memory, customBuiltins) {
   const env = {};
 
-  const isStreaming =
-  policyWasm instanceof Response ||
-  policyWasm instanceof Promise ||
-  (typeof policyWasm === "object" &&
-    "then" in policyWasm &&
-    typeof policyWasm === "function");
+  const isStreaming = policyWasm instanceof Response || policyWasm instanceof Promise;
 
   const importObject = _importObject(env, memory, customBuiltins);
 
@@ -468,7 +463,7 @@ module.exports = {
    * To set custom memory size specify number of memory pages
    * as second param.
    * Defaults to 5 pages (320KB).
-   * @param {BufferSource | WebAssembly.Module | Response | PromiseLike<Response>} regoWasm
+   * @param {BufferSource | WebAssembly.Module | Response | Promise<Response>} regoWasm
    * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
    * @param {{ [builtinName: string]: Function }} customBuiltins A map from string names to builtin functions
    * @returns {Promise<LoadedPolicy>}
