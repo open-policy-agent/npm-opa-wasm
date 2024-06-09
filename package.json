@@ -3,12 +3,12 @@
   "version": "1.8.1",
   "description": "Open Policy Agent WebAssembly SDK",
   "main": "./src/index.cjs",
-  "types": "./dist/types/opa.d.ts",
+  "types": "./dist/types/opa.d.cts",
   "exports": {
     ".": {
       "types": {
-        "import": "./dist/types/opa.d.ts",
-        "require": "./dist/types/opa.d.ts"
+        "import": "./dist/types/opa.d.mts",
+        "require": "./dist/types/opa.d.cts"
       },
       "import": "./src/index.mjs",
       "require": "./src/index.cjs"
