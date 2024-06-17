@@ -41,3 +41,6 @@ npx tsc ./src/index.mjs \
   --allowJs \
   --emitDeclarationOnly \
   --outDir $outdir/types
+
+mv $outdir/types/opa.d.ts $outdir/types/opa.d.mts
+cp $outdir/types/opa.d.mts $outdir/types/opa.d.cts
