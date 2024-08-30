@@ -47,10 +47,7 @@ jobs:
 
     - name: Prep OPA cases
       working-directory: opa
-      # TODO(sr): This make target runs the tests, too, and we don't need
-      # this here. However, to untangle PRs, let's done some extra work now
-      # and fix this situation later.
-      run: make wasm-rego-test
+      run: WASM_BUILD_ONLY=true make wasm-rego-test
 
     # NOTE(sr): we've got to get rid of the opa checkout because the test
     # runner would otherwise pick up any .js files it finds in there.
