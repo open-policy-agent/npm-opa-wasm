@@ -16,7 +16,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
         deno-version: v1.39.2
     - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: open-policy-agent/setup-opa@v2
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
         deno-version: v1.39.2
     - run: make
