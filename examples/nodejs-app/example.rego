@@ -2,7 +2,7 @@ package example
 
 default hello = false
 
-hello {
+hello if {
     x := input.message
     x == data.world
 }

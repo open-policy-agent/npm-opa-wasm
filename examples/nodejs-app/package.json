@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "demo app",
   "main": "app.js",
-  "scripts": {},
+  "scripts": {
+    "build": "opa build -t wasm -e example/hello ./example.rego && tar xzf ./bundle.tar.gz /policy.wasm",
+    "start": "node app.js"
+  },
   "dependencies": {
     "@open-policy-agent/opa-wasm": "file:../../"
   },
