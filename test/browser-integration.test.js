@@ -1,14 +1,15 @@
-const puppeteer = require("puppeteer");
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 
+let puppeteer;
 let server;
 let browser;
 let page;
 
 beforeAll(async () => {
+  puppeteer = await import("puppeteer");
   generateFixtureBundle();
 
   server = await startStaticServer();
