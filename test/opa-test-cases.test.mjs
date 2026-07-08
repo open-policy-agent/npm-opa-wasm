@@ -1,7 +1,7 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it, test } from "@jest/globals";
+import { describe, expect, it, test } from "vitest";
 import sort from "smart-deep-sort";
 import tmp from "tmp";
 import opa from "../src/opa.js";

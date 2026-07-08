@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { describe, expect, it, test } from "@jest/globals";
+import { describe, expect, it, test } from "vitest";
 import opa from "../src/opa.js";
 
 const { loadPolicy } = opa;

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import http from "node:http";
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterAll, beforeAll, expect, test } from "@jest/globals";
+import { afterAll, beforeAll, expect, test } from "vitest";
 import puppeteer from "puppeteer";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -36,7 +36,8 @@ afterAll(async () => {
 });
 
 test("esm script should expose working opa module", async () => {
-  const result = await page.evaluate(async function () {
+  // NOTE: avoid transforming the dynamic import
+  const result = await page.evaluate(`(async function () {
     // NOTE: Paths are evaluated relative to the project root.
     const { default: opa } = await import("/dist/opa-wasm-browser.esm.js");
     const wasm = await fetch("/test/fixtures/multiple-entrypoints/policy.wasm")
@@ -44,7 +45,7 @@ test("esm script should expose working opa module", async () => {
       .then((b) => b.arrayBuffer());
     const policy = await opa.loadPolicy(wasm);
     return policy.evaluate({}, "example/one");
-  });
+    })()`);
   expect(result).toEqual([
     {
       result: { myOtherRule: false, myRule: false },
@@ -53,14 +54,15 @@ test("esm script should expose working opa module", async () => {
 });
 
 test("loadPolicy should allow for a response object that resolves to a fetched wasm module", async () => {
-  const result = await page.evaluate(async function () {
+  // NOTE: avoid transforming the dynamic import
+  const result = await page.evaluate(`(async function () {
     // NOTE: Paths are evaluated relative to the project root.
     const { default: opa } = await import("/dist/opa-wasm-browser.esm.js");
     const policy = await opa.loadPolicy(
       fetch("/test/fixtures/multiple-entrypoints/policy.wasm"),
     );
     return policy.evaluate({}, "example/one");
-  });
+    })()`);
   expect(result).toEqual([
     {
       result: { myOtherRule: false, myRule: false },

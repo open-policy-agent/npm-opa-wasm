@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "@jest/globals";
+import { beforeAll, describe, expect, it } from "vitest";
 import semver from "semver";
 import opa from "../src/opa.js";
 

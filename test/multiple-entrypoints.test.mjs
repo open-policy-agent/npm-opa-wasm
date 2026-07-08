@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { beforeAll, describe, expect, it } from "@jest/globals";
+import { beforeAll, describe, expect, it } from "vitest";
 import opa from "../src/opa.js";
 
 const { loadPolicy } = opa;
