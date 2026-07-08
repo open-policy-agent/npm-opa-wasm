@@ -14,14 +14,21 @@ beforeAll(async () => {
   server = await startStaticServer();
   const port = server.address().port;
 
-  browser = await puppeteer.launch();
+  browser = await puppeteer.launch({
+    args: ["--no-sandbox"],
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+  });
   page = await browser.newPage();
   await page.goto(`http://localhost:${port}/`);
 });
 
 afterAll(async () => {
-  await browser.close();
-  server.close();
+  if (browser) {
+    await browser.close();
+  }
+  if (server) {
+    server.close();
+  }
 });
 
 test("esm script should expose working opa module", async () => {

@@ -1,4 +1,5 @@
 {
+  "features": ["rego_v1"],
   "builtins": [
     {
       "name": "custom.zeroArgBuiltin",

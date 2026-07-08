@@ -26,6 +26,9 @@
     "fmt": "git ls-files | xargs deno fmt",
     "test": "jest --verbose"
   },
+  "jest": {
+    "testPathIgnorePatterns": ["/node_modules/", "/opa/"]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/open-policy-agent/npm-opa-wasm.git"

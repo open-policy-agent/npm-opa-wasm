@@ -1,5 +1,5 @@
 package test
 
-default allow = false
+default allow := false
 
-allow { input == "open sesame" }
+allow if { input == "open sesame" }
