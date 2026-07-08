@@ -1,15 +1,18 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-const { execFileSync } = require("child_process");
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import http from "node:http";
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterAll, beforeAll, expect, test } from "@jest/globals";
+import puppeteer from "puppeteer";
 
-let puppeteer;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 let server;
 let browser;
 let page;
 
 beforeAll(async () => {
-  puppeteer = await import("puppeteer");
   generateFixtureBundle();
 
   server = await startStaticServer();

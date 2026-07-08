@@ -1,7 +1,10 @@
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
-const semver = require("semver");
-const { loadPolicy, loadPolicySync } = require("../src/opa.js");
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "@jest/globals";
+import semver from "semver";
+import opa from "../src/opa.js";
+
+const { loadPolicy, loadPolicySync } = opa;
 
 describe("growing memory", () => {
   const fixturesFolder = "test/fixtures/memory";

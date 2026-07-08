@@ -1,5 +1,8 @@
-const { loadPolicy } = require("../src/opa.js");
-const { readFileSync, readdirSync } = require("fs");
+import { readdirSync, readFileSync } from "node:fs";
+import { describe, expect, it, test } from "@jest/globals";
+import opa from "../src/opa.js";
+
+const { loadPolicy } = opa;
 
 let files = [];
 const path = process.env.OPA_CASES;

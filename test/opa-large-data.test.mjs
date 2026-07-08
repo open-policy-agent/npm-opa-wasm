@@ -1,8 +1,11 @@
-const { EOL } = require("os");
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
-const { loadPolicy } = require("../src/opa.js");
-const util = require("util");
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { EOL } from "node:os";
+import { TextEncoder } from "node:util";
+import { beforeAll, describe, it } from "@jest/globals";
+import opa from "../src/opa.js";
+
+const { loadPolicy } = opa;
 
 describe("setData stress tests", () => {
   const baseDataRaw = readFileSync(
@@ -16,7 +19,7 @@ describe("setData stress tests", () => {
 
   const multiplyFactor = 50;
   data = multiplyData(baseData, multiplyFactor * 1000);
-  dataBuf = new util.TextEncoder().encode(JSON.stringify(data)).buffer;
+  dataBuf = new TextEncoder().encode(JSON.stringify(data)).buffer;
   data = null;
   const dataSize = dataBuf.byteLength / 1000000;
 

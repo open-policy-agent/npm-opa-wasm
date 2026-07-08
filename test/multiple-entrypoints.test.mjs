@@ -1,6 +1,12 @@
-const { loadPolicy } = require("../src/opa.js");
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { beforeAll, describe, expect, it } from "@jest/globals";
+import opa from "../src/opa.js";
+
+const { loadPolicy } = opa;
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 describe("multiple entrypoints", () => {
   let policy = null;

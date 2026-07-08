@@ -1,6 +1,9 @@
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
-const { loadPolicy } = require("../src/opa.js");
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { beforeAll, describe, expect, it } from "@jest/globals";
+import opa from "../src/opa.js";
+
+const { loadPolicy } = opa;
 
 describe("yaml support", () => {
   const fixturesFolder = "test/fixtures/yaml-support";
