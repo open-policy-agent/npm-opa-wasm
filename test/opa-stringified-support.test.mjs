@@ -1,7 +1,10 @@
-const { readFileSync } = require("fs");
-const { execFileSync } = require("child_process");
-const { loadPolicy } = require("../src/opa.js");
-const util = require("util");
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { TextEncoder } from "node:util";
+import { beforeAll, describe, expect, it } from "@jest/globals";
+import opa from "../src/opa.js";
+
+const { loadPolicy } = opa;
 
 describe("stringified data/input support", () => {
   const fixturesFolder = "test/fixtures/stringified-support";
@@ -47,7 +50,7 @@ describe("stringified data/input support", () => {
   });
 
   it("should accept stringified data", () => {
-    policy.setData(new util.TextEncoder().encode(dataRaw).buffer);
+    policy.setData(new TextEncoder().encode(dataRaw).buffer);
 
     //  positive check
     let result = policy.evaluate({ secret: "secret" });
@@ -65,7 +68,7 @@ describe("stringified data/input support", () => {
 
     //  positive check
     let result = policy.evaluate(
-      new util.TextEncoder().encode(
+      new TextEncoder().encode(
         JSON.stringify({ permissions: ["view:account-billing"] }),
       ).buffer,
     );

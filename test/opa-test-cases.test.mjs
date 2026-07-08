@@ -1,9 +1,12 @@
-const { readFileSync, readdirSync, writeFileSync } = require("fs");
-const { execFileSync, spawnSync } = require("child_process");
-const { join } = require("path");
-const { loadPolicy } = require("../src/opa.js");
-const tmp = require("tmp");
-const sort = require("smart-deep-sort");
+import { execFileSync, spawnSync } from "node:child_process";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it, test } from "@jest/globals";
+import sort from "smart-deep-sort";
+import tmp from "tmp";
+import opa from "../src/opa.js";
+
+const { loadPolicy } = opa;
 
 // Known failures
 const exceptions = {
@@ -17,7 +20,7 @@ const exceptions = {
 function walk(dir) {
   let results = [];
   readdirSync(dir, { withFileTypes: true }).forEach((d) => {
-    file = join(dir, d.name);
+    const file = join(dir, d.name);
     if (d.isDirectory()) {
       results = results.concat(walk(file));
     } else {
