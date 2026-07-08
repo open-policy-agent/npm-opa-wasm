@@ -28,10 +28,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.x, 20.x, 21.x]
+        node-version: [22.x, 24.x, 26.x]
         opa-version:
-        - 0.30.2 # last version with ABI 1.1, 0.31.0+ has ABI 1.2
-        - 0.41.0 # 0.35.0 is the first release with https://github.com/open-policy-agent/opa/pull/4055
+        - 1.18.2
 
     steps:
     - uses: actions/checkout@v4
@@ -54,8 +53,7 @@ jobs:
     - name: Unpack OPA cases
       run: >
         tar zxvf opa/.go/cache/testcases.tar.gz --exclude='*.js' -C test/cases &&
-        mv opa/test/cases/testdata testdata &&
-        rm -rf opa/
+        mv opa/v1/test/cases/testdata testdata
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -66,12 +64,16 @@ jobs:
       uses: open-policy-agent/setup-opa@v2
       with:
         version: v${{ matrix.opa-version }}
+    - name: Install Chrome
+      id: setup-chrome
+      uses: browser-actions/setup-chrome@v1
     - run: npm ci
     - run: npm run build
     - run: npm test
       env:
         OPA_CASES: test/cases/
         OPA_TEST_CASES: testdata
+        PUPPETEER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
 
   examples-node:
     name: NodeJS examples
@@ -83,7 +85,7 @@ jobs:
       with:
         node-version: "20.x"
     - name: nodejs
-      run: >
+      run: |
         npm ci
         npm run build
         ./e2e.sh

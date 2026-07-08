@@ -1,5 +1,5 @@
 package test
 
-p {
+p if {
     input.foo == "bar"
 }

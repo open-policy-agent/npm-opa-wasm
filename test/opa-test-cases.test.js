@@ -91,7 +91,7 @@ if (path === undefined) {
     test.todo("not found, set OPA_TEST_CASES env var");
   });
 } else {
-  for (const file of walk(path)) {
+  for (const file of walk(path).filter((f) => f.endsWith(".yaml"))) {
     describe(file, () => {
       // the raw yaml often posed problems, have opa give us json
       const res = spawnSync("opa", [

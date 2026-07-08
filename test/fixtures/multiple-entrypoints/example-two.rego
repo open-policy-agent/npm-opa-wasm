@@ -1,17 +1,17 @@
 package example.two
 
-default theirRule = false
-default ourRule = false
+default theirRule := false
+default ourRule := false
 
-theirRule {
+theirRule if {
     input.anyProp == "aValue"
 }
 
-ourRule {
+ourRule if {
     input.ourProp == "inTheMiddleOfTheStreet"
 }
 
-coolRule {
+coolRule if {
     theirRule
     ourRule
 }
