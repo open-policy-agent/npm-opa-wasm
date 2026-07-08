@@ -24,12 +24,7 @@
     "lint": "git ls-files | xargs deno lint",
     "fmt:check": "git ls-files | xargs deno fmt --check",
     "fmt": "git ls-files | xargs deno fmt",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose"
-  },
-  "jest": {
-    "roots": [
-      "<rootDir>/test"
-    ]
+    "test": "vitest"
   },
   "repository": {
     "type": "git",
@@ -49,12 +44,12 @@
   "devDependencies": {
     "@types/node": "^26.1.1",
     "esbuild": "^0.28.1",
-    "jest": "^30.4.2",
     "puppeteer": "^25.3.0",
     "semver": "^7.8.5",
     "smart-deep-sort": "^1.0.2",
     "tmp": "^0.2.7",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "sprintf-js": "^1.1.3",

@@ -1,8 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { EOL } from "node:os";
-import { TextEncoder } from "node:util";
-import { beforeAll, describe, it } from "@jest/globals";
+import { beforeAll, describe, it } from "vitest";
 import opa from "../src/opa.js";
 
 const { loadPolicy } = opa;
