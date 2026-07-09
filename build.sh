@@ -3,7 +3,7 @@
 # bundled as well as the type declaration.
 set -euo pipefail
 
-entrypoint=./src/opa.js
+entrypoint=./src/index.ts
 outdir=./dist
 package=$(node -pe 'require("./package.json").name.split("/").pop()')
 
@@ -11,6 +11,9 @@ if [[ ! -x $(npm bin)/esbuild || ! -x $(npm bin)/tsc ]]; then
   echo "Installing dependencies…"
   npm install
 fi
+
+echo "Build esm and cjs modules…"
+npx tshy
 
 echo "Generating default browser build…"
 npx esbuild $entrypoint \
@@ -34,13 +37,3 @@ npx esbuild $entrypoint \
   --platform=browser \
   --define:global=window \
   --external:util
-
-echo "Generating TypeScript declaration file…"
-npx tsc ./src/index.mjs \
-  --declaration \
-  --allowJs \
-  --emitDeclarationOnly \
-  --outDir $outdir/types
-
-mv $outdir/types/opa.d.ts $outdir/types/opa.d.mts
-cp $outdir/types/opa.d.mts $outdir/types/opa.d.cts

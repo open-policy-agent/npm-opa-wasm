@@ -1,4 +1,4 @@
-const yaml = require("yaml");
+import yaml from "yaml";
 
 function parse(str) {
   if (typeof str !== "string") {
@@ -13,7 +13,7 @@ function parse(str) {
   return { ok: true, result: doc.toJS() };
 }
 
-module.exports = {
+export default {
   // is_valid is expected to return nothing if input is invalid otherwise
   // true/false for it being valid YAML.
   "yaml.is_valid": (str) => typeof str === "string" ? parse(str).ok : undefined,
