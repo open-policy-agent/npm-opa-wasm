@@ -1,6 +1,6 @@
 import yaml from "yaml";
 
-function parse(str) {
+function parse(str: unknown) {
   if (typeof str !== "string") {
     return { ok: false, result: undefined };
   }
@@ -16,7 +16,8 @@ function parse(str) {
 export default {
   // is_valid is expected to return nothing if input is invalid otherwise
   // true/false for it being valid YAML.
-  "yaml.is_valid": (str) => typeof str === "string" ? parse(str).ok : undefined,
-  "yaml.marshal": (data) => yaml.stringify(data),
-  "yaml.unmarshal": (str) => parse(str).result,
+  "yaml.is_valid": (str: unknown) =>
+    typeof str === "string" ? parse(str).ok : undefined,
+  "yaml.marshal": (data: unknown) => yaml.stringify(data),
+  "yaml.unmarshal": (str: unknown) => parse(str).result,
 };

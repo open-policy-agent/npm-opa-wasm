@@ -1,4 +1,4 @@
-function isValidJSON(str) {
+function isValidJSON(str: unknown) {
   if (typeof str !== "string") {
     return;
   }
