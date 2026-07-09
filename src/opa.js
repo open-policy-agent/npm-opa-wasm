@@ -1,7 +1,7 @@
 // Copyright 2018 The OPA Authors.  All rights reserved.
 // Use of this source code is governed by an Apache2
 // license that can be found in the LICENSE file.
-const builtIns = require("./builtins/index");
+import builtIns from "./builtins/index.js";
 
 /**
  * @param {WebAssembly.Memory} mem
@@ -456,7 +456,7 @@ function roundup(bytes) {
   return Math.ceil(bytes / pageSize);
 }
 
-module.exports = {
+export default {
   /**
    * Takes in either an ArrayBuffer or WebAssembly.Module
    * and will return a Promise of a LoadedPolicy object which

@@ -13,6 +13,6 @@ function isValidJSON(str) {
   }
 }
 
-module.exports = {
+export default {
   "json.is_valid": isValidJSON,
 };

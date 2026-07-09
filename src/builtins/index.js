@@ -1,9 +1,9 @@
-const json = require("./json");
-const strings = require("./strings");
-const regex = require("./regex");
-const yaml = require("./yaml");
+import json from "./json.js";
+import strings from "./strings.js";
+import regex from "./regex.js";
+import yaml from "./yaml.js";
 
-module.exports = {
+export default {
   ...json,
   ...strings,
   ...regex,

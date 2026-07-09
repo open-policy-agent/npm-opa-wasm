@@ -1,5 +1,5 @@
-const vsprintf = require("sprintf-js").vsprintf;
+import { vsprintf } from "sprintf-js";
 
 const sprintf = (s, values) => vsprintf(s, values);
 
-module.exports = { sprintf };
+export default { sprintf };
