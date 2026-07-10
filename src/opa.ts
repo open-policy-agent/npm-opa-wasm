@@ -3,11 +3,51 @@
 // license that can be found in the LICENSE file.
 import builtIns from "./builtins/index.js";
 
+type BuiltinFunction = (...args: unknown[]) => unknown;
+type BuiltinMap = { [builtinName: string]: BuiltinFunction };
+type Env = {
+  instance?: OpaInstance;
+  builtins?: { [builtinId: string]: string };
+};
+type Entrypoints = { [name: string]: number };
+
+type OpaWasmExports = {
+  [name: string]: WebAssembly.ExportValue | number | undefined;
+  opa_malloc: (size: number) => number;
+  opa_json_parse: (rawAddr: number, valueBufLen: number) => number;
+  opa_json_dump: (addr: number) => number;
+  builtins: () => number;
+  entrypoints: () => number;
+  opa_wasm_abi_version?: number | WebAssembly.Global;
+  opa_wasm_abi_minor_version?: number | WebAssembly.Global;
+  opa_heap_ptr_get: () => number;
+  opa_heap_ptr_set: (addr: number) => void;
+  opa_eval: (
+    reserved: number,
+    entrypoint: number,
+    dataAddr: number,
+    inputAddr: number,
+    inputLen: number,
+    heapPtr: number,
+    format: number,
+  ) => number;
+  opa_eval_ctx_new: () => number;
+  opa_eval_ctx_set_input: (ctxAddr: number, inputAddr: number) => void;
+  opa_eval_ctx_set_data: (ctxAddr: number, dataAddr: number) => void;
+  opa_eval_ctx_set_entrypoint: (
+    ctxAddr: number,
+    entrypoint: number,
+  ) => void;
+  eval: (ctxAddr: number) => void;
+  opa_eval_ctx_get_result: (ctxAddr: number) => number;
+};
+type OpaInstance = WebAssembly.Instance & { exports: OpaWasmExports };
+
 /**
  * @param {WebAssembly.Memory} mem
  */
-function stringDecoder(mem) {
-  return function (addr) {
+function stringDecoder(mem: WebAssembly.Memory) {
+  return function (addr: number) {
     const i8 = new Int8Array(mem.buffer);
     let s = "";
     while (i8[addr] !== 0) {
@@ -19,12 +59,15 @@ function stringDecoder(mem) {
 
 /**
  * Stringifies and loads an object into OPA's Memory
- * @param {WebAssembly.Instance} wasmInstance
- * @param {WebAssembly.Memory} memory
- * @param {any | ArrayBuffer} value data as `object`, literal primitive or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
- * @returns {number}
+ * @param wasmInstance
+ * @param memory
+ * @param value data as `object`, literal primitive or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
  */
-function _loadJSON(wasmInstance, memory, value) {
+function _loadJSON(
+  wasmInstance: OpaInstance,
+  memory: WebAssembly.Memory,
+  value: unknown | ArrayBuffer,
+): number {
   if (value === undefined) {
     return 0;
   }
@@ -52,12 +95,12 @@ function _loadJSON(wasmInstance, memory, value) {
 
 /**
  * Dumps and parses a JSON object from OPA's Memory
- * @param {WebAssembly.Instance} wasmInstance
- * @param {WebAssembly.Memory} memory
- * @param {number} addr
- * @returns {object}
  */
-function _dumpJSON(wasmInstance, memory, addr) {
+function _dumpJSON(
+  wasmInstance: OpaInstance,
+  memory: WebAssembly.Memory,
+  addr: number,
+): object {
   const rawAddr = wasmInstance.exports.opa_json_dump(addr);
   return _dumpJSONRaw(memory, rawAddr);
 }
@@ -68,7 +111,7 @@ function _dumpJSON(wasmInstance, memory, addr) {
  * @param {number} addr
  * @returns {object}
  */
-function _dumpJSONRaw(memory, addr) {
+function _dumpJSONRaw(memory: WebAssembly.Memory, addr: number): object {
   const buf = new Uint8Array(memory.buffer);
 
   let idx = addr;
@@ -83,23 +126,19 @@ function _dumpJSONRaw(memory, addr) {
   return JSON.parse(jsonAsText);
 }
 
-const builtinFuncs = builtIns;
+const builtinFuncs = builtIns as BuiltinMap;
 
 /**
  * _builtinCall dispatches the built-in function. The built-in function
  * arguments are loaded from Wasm and back in using JSON serialization.
- * @param {WebAssembly.Instance} wasmInstance
- * @param {WebAssembly.Memory} memory
- * @param {{ [builtinId: number]: string }} builtins
- * @param {{ [builtinName: string]: Function }} customBuiltins
- * @param {string} builtin_id
  */
 function _builtinCall(
-  wasmInstance,
-  memory,
-  builtins,
-  customBuiltins,
-  builtinId,
+  wasmInstance: OpaInstance,
+  memory: WebAssembly.Memory,
+  builtins: { [builtinId: string]: string },
+  customBuiltins: BuiltinMap,
+  builtinId: string,
+  ...args: number[]
 ) {
   const builtInName = builtins[builtinId];
   const impl = builtinFuncs[builtInName] || customBuiltins[builtInName];
@@ -113,15 +152,9 @@ function _builtinCall(
     };
   }
 
-  const argArray = Array.prototype.slice.apply(arguments);
-  const args = [];
-
-  for (let i = 5; i < argArray.length; i++) {
-    const jsArg = _dumpJSON(wasmInstance, memory, argArray[i]);
-    args.push(jsArg);
-  }
-
-  const result = impl(...args);
+  const result = impl(
+    ...args.map((arg) => _dumpJSON(wasmInstance, memory, arg)),
+  );
 
   return _loadJSON(wasmInstance, memory, result);
 }
@@ -133,53 +166,68 @@ function _builtinCall(
  * @param {{ [builtinName: string]: Function }} customBuiltins
  * @returns {WebAssembly.Imports}
  */
-function _importObject(env, memory, customBuiltins) {
+function _importObject(
+  env: Env,
+  memory: WebAssembly.Memory,
+  customBuiltins: BuiltinMap,
+): WebAssembly.Imports {
   const addr2string = stringDecoder(memory);
 
   return {
     env: {
       memory,
-      opa_abort: function (addr) {
+      opa_abort: function (addr: number) {
         throw addr2string(addr);
       },
-      opa_println: function (addr) {
+      opa_println: function (addr: number) {
         console.log(addr2string(addr));
       },
-      opa_builtin0: function (builtinId, _ctx) {
+      opa_builtin0: function (builtinId: string, _ctx: unknown) {
         return _builtinCall(
-          env.instance,
+          env.instance!,
           memory,
-          env.builtins,
+          env.builtins!,
           customBuiltins,
           builtinId,
         );
       },
-      opa_builtin1: function (builtinId, _ctx, arg1) {
+      opa_builtin1: function (builtinId: string, _ctx: unknown, arg1: number) {
         return _builtinCall(
-          env.instance,
+          env.instance!,
           memory,
-          env.builtins,
+          env.builtins!,
           customBuiltins,
           builtinId,
           arg1,
         );
       },
-      opa_builtin2: function (builtinId, _ctx, arg1, arg2) {
+      opa_builtin2: function (
+        builtinId: string,
+        _ctx: unknown,
+        arg1: number,
+        arg2: number,
+      ) {
         return _builtinCall(
-          env.instance,
+          env.instance!,
           memory,
-          env.builtins,
+          env.builtins!,
           customBuiltins,
           builtinId,
           arg1,
           arg2,
         );
       },
-      opa_builtin3: function (builtinId, _ctx, arg1, arg2, arg3) {
+      opa_builtin3: function (
+        builtinId: string,
+        _ctx: unknown,
+        arg1: number,
+        arg2: number,
+        arg3: number,
+      ) {
         return _builtinCall(
-          env.instance,
+          env.instance!,
           memory,
-          env.builtins,
+          env.builtins!,
           customBuiltins,
           builtinId,
           arg1,
@@ -187,11 +235,18 @@ function _importObject(env, memory, customBuiltins) {
           arg3,
         );
       },
-      opa_builtin4: function (builtinId, _ctx, arg1, arg2, arg3, arg4) {
+      opa_builtin4: function (
+        builtinId: string,
+        _ctx: unknown,
+        arg1: number,
+        arg2: number,
+        arg3: number,
+        arg4: number,
+      ) {
         return _builtinCall(
-          env.instance,
+          env.instance!,
           memory,
-          env.builtins,
+          env.builtins!,
           customBuiltins,
           builtinId,
           arg1,
@@ -211,8 +266,15 @@ function _importObject(env, memory, customBuiltins) {
  * @param {WebAssembly.Memory} memory
  * @returns { policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }}
  */
-function _preparePolicy(env, wasm, memory) {
-  env.instance = wasm.instance ? wasm.instance : wasm;
+function _preparePolicy(
+  env: Env,
+  wasm: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance,
+  memory: WebAssembly.Memory,
+): {
+  policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance;
+  minorVersion: number;
+} {
+  env.instance = ("instance" in wasm ? wasm.instance : wasm) as OpaInstance;
 
   // Note: On Node 10.x this value is a number on Node 12.x and up it is
   // an object with numberic `value` property.
@@ -229,7 +291,7 @@ function _preparePolicy(env, wasm, memory) {
   }
 
   const abiMinorVersionGlobal = env.instance.exports.opa_wasm_abi_minor_version;
-  let abiMinorVersion;
+  let abiMinorVersion = 0;
   if (abiMinorVersionGlobal !== undefined) {
     abiMinorVersion = typeof abiMinorVersionGlobal === "number"
       ? abiMinorVersionGlobal
@@ -242,7 +304,7 @@ function _preparePolicy(env, wasm, memory) {
     env.instance,
     memory,
     env.instance.exports.builtins(),
-  );
+  ) as Record<string, string>;
 
   /** @type {typeof builtIns} */
   env.builtins = {};
@@ -262,12 +324,17 @@ function _preparePolicy(env, wasm, memory) {
  * It will return a Promise, depending on the input type the promise
  * resolves to both a compiled WebAssembly.Module and its first WebAssembly.Instance
  * or to the WebAssemblyInstance.
- * @param {BufferSource | WebAssembly.Module | Response | Promise<Response>} policyWasm
- * @param {WebAssembly.Memory} memory
- * @param {{ [builtinName: string]: Function }} customBuiltins
- * @returns {Promise<{ policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance, minorVersion: number }>}
  */
-async function _loadPolicy(policyWasm, memory, customBuiltins) {
+async function _loadPolicy(
+  policyWasm: BufferSource | WebAssembly.Module | Response | Promise<Response>,
+  memory: WebAssembly.Memory,
+  customBuiltins: BuiltinMap,
+): Promise<
+  {
+    policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance;
+    minorVersion: number;
+  }
+> {
   const env = {};
 
   const isStreaming = policyWasm instanceof Response ||
@@ -289,17 +356,17 @@ async function _loadPolicy(policyWasm, memory, customBuiltins) {
  * and an object mapping string names to additional builtin functions for
  * the third parameter.
  * It will return a compiled WebAssembly.Module and its first WebAssembly.Instance.
- * @param {BufferSource | WebAssembly.Module} policyWasm
- * @param {WebAssembly.Memory} memory
- * @param {{ [builtinName: string]: Function }} customBuiltins
- * @returns {Promise<{ policy: WebAssembly.Instance, minorVersion: number }>}
  */
-function _loadPolicySync(policyWasm, memory, customBuiltins) {
+function _loadPolicySync(
+  policyWasm: BufferSource | WebAssembly.Module,
+  memory: WebAssembly.Memory,
+  customBuiltins: BuiltinMap,
+) {
   const env = {};
 
   if (
     policyWasm instanceof ArrayBuffer ||
-    policyWasm.buffer instanceof ArrayBuffer
+    ("buffer" in policyWasm && policyWasm.buffer instanceof ArrayBuffer)
   ) {
     policyWasm = new WebAssembly.Module(policyWasm);
   }
@@ -318,19 +385,31 @@ function _loadPolicySync(policyWasm, memory, customBuiltins) {
  * handle the output from the policy wasm.
  */
 class LoadedPolicy {
+  minorVersion: number;
+  mem: WebAssembly.Memory;
+  wasmInstance: OpaInstance;
+
+  dataAddr: number;
+  baseHeapPtr: number;
+  dataHeapPtr: number;
+  entrypoints: Entrypoints;
+
   /**
    * Loads and initializes a compiled Rego policy.
-   * @param {WebAssembly.WebAssemblyInstantiatedSource} policy
-   * @param {WebAssembly.Memory} memory
    */
-  constructor(policy, memory, minorVersion) {
+  constructor(
+    policy: WebAssembly.WebAssemblyInstantiatedSource | WebAssembly.Instance,
+    memory: WebAssembly.Memory,
+    minorVersion: number,
+  ) {
     this.minorVersion = minorVersion;
     this.mem = memory;
 
     // Depending on how the wasm was instantiated "policy" might be a
     // WebAssembly Instance or be a wrapper around the Module and
     // Instance. We only care about the Instance.
-    this.wasmInstance = policy.instance ? policy.instance : policy;
+    this.wasmInstance =
+      ("instance" in policy ? policy.instance : policy) as OpaInstance;
 
     this.dataAddr = _loadJSON(this.wasmInstance, this.mem, {});
     this.baseHeapPtr = this.wasmInstance.exports.opa_heap_ptr_get();
@@ -339,7 +418,7 @@ class LoadedPolicy {
       this.wasmInstance,
       this.mem,
       this.wasmInstance.exports.entrypoints(),
-    );
+    ) as Entrypoints;
   }
 
   /**
@@ -350,10 +429,13 @@ class LoadedPolicy {
    * To call a non-default entrypoint in your WASM specify it as the second
    * param. A list of entrypoints can be accessed with the `this.entrypoints`
    * property.
-   * @param {any | ArrayBuffer} input input to be evaluated in form of `object`, literal primitive or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
-   * @param {number | string} entrypoint ID or name of the entrypoint to call (optional)
+   * @param input input to be evaluated in form of `object`, literal primitive or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
+   * @param entrypoint ID or name of the entrypoint to call (optional)
    */
-  evaluate(input, entrypoint = 0) {
+  evaluate(
+    input: unknown | ArrayBuffer,
+    entrypoint: number | string = 0,
+  ): unknown[] | null {
     // determine entrypoint ID
     if (typeof entrypoint === "number") {
       // used as-is
@@ -404,7 +486,7 @@ class LoadedPolicy {
         heapPtr,
         0,
       );
-      return _dumpJSONRaw(this.mem, ret);
+      return _dumpJSONRaw(this.mem, ret) as unknown[];
     }
 
     // Reset the heap pointer before each evaluation
@@ -426,32 +508,31 @@ class LoadedPolicy {
     const resultAddr = this.wasmInstance.exports.opa_eval_ctx_get_result(
       ctxAddr,
     );
-    return _dumpJSON(this.wasmInstance, this.mem, resultAddr);
+    return _dumpJSON(this.wasmInstance, this.mem, resultAddr) as unknown[];
   }
 
   /**
    * evalBool will evaluate the policy and return a boolean answer
    * depending on the return code from the policy evaluation.
    * @deprecated Use `evaluate` instead.
-   * @param {object} input
    */
-  evalBool(input) {
+  evalBool(input: object) {
     const rs = this.evaluate(input);
     return rs && rs.length === 1 && rs[0] === true;
   }
 
   /**
    * Loads data for use in subsequent evaluations.
-   * @param {object | ArrayBuffer} data  data in form of `object` or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
+   * @param data  data in form of `object` or ArrayBuffer (last is assumed to be a well-formed stringified JSON)
    */
-  setData(data) {
+  setData(data: object | ArrayBuffer) {
     this.wasmInstance.exports.opa_heap_ptr_set(this.baseHeapPtr);
     this.dataAddr = _loadJSON(this.wasmInstance, this.mem, data);
     this.dataHeapPtr = this.wasmInstance.exports.opa_heap_ptr_get();
   }
 }
 
-function roundup(bytes) {
+function roundup(bytes: number) {
   const pageSize = 64 * 1024;
   return Math.ceil(bytes / pageSize);
 }
@@ -465,12 +546,15 @@ export default {
    * To set custom memory size specify number of memory pages
    * as second param.
    * Defaults to 5 pages (320KB).
-   * @param {BufferSource | WebAssembly.Module | Response | Promise<Response>} regoWasm
-   * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
-   * @param {{ [builtinName: string]: Function }} customBuiltins A map from string names to builtin functions
-   * @returns {Promise<LoadedPolicy>}
+   * @param regoWasm
+   * @param memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
+   * @param customBuiltins A map from string names to builtin functions
    */
-  async loadPolicy(regoWasm, memoryDescriptor = {}, customBuiltins = {}) {
+  async loadPolicy(
+    regoWasm: BufferSource | WebAssembly.Module | Response | Promise<Response>,
+    memoryDescriptor: number | WebAssembly.MemoryDescriptor = { initial: 5 },
+    customBuiltins: BuiltinMap = {},
+  ): Promise<LoadedPolicy> {
     // back-compat, second arg used to be a number: 'memorySize', with default of 5
     if (typeof memoryDescriptor === "number") {
       memoryDescriptor = { initial: memoryDescriptor };
@@ -498,12 +582,15 @@ export default {
    * To set custom memory size specify number of memory pages
    * as second param.
    * Defaults to 5 pages (320KB).
-   * @param {BufferSource | WebAssembly.Module} regoWasm
-   * @param {number | WebAssembly.MemoryDescriptor} memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
-   * @param {{ [builtinName: string]: Function }} customBuiltins A map from string names to builtin functions
-   * @returns {LoadedPolicy}
+   * @param regoWasm
+   * @param memoryDescriptor For backwards-compatibility, a 'number' argument is taken to be the initial memory size.
+   * @param customBuiltins A map from string names to builtin functions
    */
-  loadPolicySync(regoWasm, memoryDescriptor = {}, customBuiltins = {}) {
+  loadPolicySync(
+    regoWasm: BufferSource | WebAssembly.Module,
+    memoryDescriptor: number | WebAssembly.MemoryDescriptor = { initial: 5 },
+    customBuiltins: BuiltinMap = {},
+  ): LoadedPolicy {
     // back-compat, second arg used to be a number: 'memorySize', with default of 5
     if (typeof memoryDescriptor === "number") {
       memoryDescriptor = { initial: memoryDescriptor };
