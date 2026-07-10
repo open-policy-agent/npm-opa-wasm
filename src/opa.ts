@@ -435,7 +435,7 @@ class LoadedPolicy {
   evaluate(
     input: unknown | ArrayBuffer,
     entrypoint: number | string = 0,
-  ): unknown[] {
+  ): unknown[] | null {
     // determine entrypoint ID
     if (typeof entrypoint === "number") {
       // used as-is
@@ -518,7 +518,7 @@ class LoadedPolicy {
    */
   evalBool(input: object) {
     const rs = this.evaluate(input);
-    return rs.length === 1 && rs[0] === true;
+    return rs && rs.length === 1 && rs[0] === true;
   }
 
   /**
